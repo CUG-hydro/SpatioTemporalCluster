@@ -1,0 +1,7 @@
+.Rproj.user/
+.Rhistory
+temp/
+src/CMakeFiles/
+*.zip
+*.o
+*.mod
