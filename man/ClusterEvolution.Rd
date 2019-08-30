@@ -4,16 +4,16 @@
 \alias{ClusterEvolution}
 \title{ClusterEvolution}
 \usage{
-ClusterEvolution(SMIc, cellCoor, nCellInter = 1, thCellClus = 1)
+ClusterEvolution(SMIc, cellCoor, thCellClus = 1, nCellInter = 1)
 }
 \arguments{
 \item{SMIc}{integer array, `[nrow, ncol, ntime]`}
 
 \item{cellCoor}{integer matrix, `[nCells, 2]`}
 
-\item{nCellInter}{number cells for joining clusters in time}
-
 \item{thCellClus}{treshold  for cluster formation in space}
+
+\item{nCellInter}{number cells for joining clusters in time}
 }
 \description{
 cluster drought clusters in space and time

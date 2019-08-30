@@ -28,9 +28,12 @@ droughtIndicatorR <- function(mat, mask, SMI_thld){
     r <- .Fortran("droughtindicator", mat, mask, as.single(SMI_thld), 
                   nrows, ncols, nMonths,
                   cellCoor, SMIc)
+
+    n <- length(r)
+    ans <- r[c(n, n-1)] 
     # names(r) <- c("mat", "mask", "thld", "cellCoor", "SMIc")
     # .Fortran("droughtIndicator", SMI, mask, SMI_thld, )
-    r
+    setNames(ans, c("SMIc", "cellCoor"))    
 }
 
 
@@ -40,14 +43,14 @@ droughtIndicatorR <- function(mat, mask, SMI_thld){
 #' 
 #' @param SMIc integer array, `[nrow, ncol, ntime]`
 #' @param cellCoor integer matrix, `[nCells, 2]`
-#' @param nCellInter number cells for joining clusters in time
 #' @param thCellClus treshold  for cluster formation in space
+#' @param nCellInter number cells for joining clusters in time
 #' 
 #' @author
 #' Budapest, 10-11.03.2011
 #' 
 #' @export
-ClusterEvolution <- function(SMIc, cellCoor, nCellInter = 1, thCellClus = 1){
+ClusterEvolution <- function(SMIc, cellCoor, thCellClus = 1L, nCellInter = 1L){
     dim     <- dim(SMIc) 
     nrows   <- dim[1]
     ncols   <- dim[2]

@@ -64,7 +64,7 @@ subroutine droughtIndicator( SMI, mask, SMI_thld, &
   !
   print *, 'Threshold for drought identification: ', SMI_thld
   print *, "nrow, ncol, ncol = ", nrows, ncols, nMonths
-  print *, mask
+  ! print *, mask
   
   ! allocate ( SMIc( nrows, ncols, nMonths) )
   ! allocate ( cellCoor( count(mask), 2) )
@@ -85,7 +85,6 @@ subroutine droughtIndicator( SMI, mask, SMI_thld, &
   k = 0
   do j=1,ncols
      do i=1,nrows
-        print *, "mask(i, j) = ", mask(i, j)
         if ( mask(i,j)) then
            k = k + 1
            cellCoor(k,1) = i
@@ -129,10 +128,10 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
 
   ! local variables
   integer(i4)                              :: i, j, t
-  integer(i4), dimension(:),   allocatable :: nC
+  integer(i4), dimension(:),   allocatable :: nC             ! num of clusters per time step
   integer(i4), parameter                   :: factor = 1000
-  integer(i4)                              :: ncInter
-  integer(i4), dimension(:,:), allocatable :: cno
+  integer(i4)                              :: ncInter        ! integer, overlaped grids
+  integer(i4), dimension(:,:), allocatable :: cno            ! clusters_num_id [nMonth, nC_j]
   integer(i4), dimension(:),   allocatable :: cnoList
   integer(i4), dimension(:),   allocatable :: vec
   integer(i4)                              :: maxNc, nTotal, idRep
@@ -153,6 +152,7 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
         idCluster(:,:,t) = nodata_i4
         cycle
      end if
+     ! two values return (nC and idCluster) and update SMIc
      call findClusters (cellCoor, thCellClus, t, idCluster(:,:,t), nC(t), nrows, ncols, nCells, SMIc)
      !print*, 'Finding clusters time :', t, nC(t)
   end do
@@ -161,6 +161,7 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
   ! maximum number of clusters at all time steps
   maxNc = maxval(nC(:))
   nTotal = nMonths*maxNc
+
   allocate ( cno(nMonths,maxNc), vec(nTotal), cnoList(nTotal) )
   cno = -9
   !
@@ -183,14 +184,14 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
   do t=2,nMonths
      do i=1,nC(t)
         if (cno(t,i) == -9) cycle
-        do j=1,nC(t-1)
+        do j=1,nC(t-1) ! 上一时刻所有cluster
            if (cno(t-1,j) == -9) cycle
            ncInter = count ( idCluster(:,:,t) == cno(t,i) .and. idCluster(:,:,t-1) == cno(t-1,j) )
            if ( ncInter >= nCellInter ) then
-              ! renumber all from 1 to t
-              where ( idCluster(:,:,1:t) == cno(t-1,j) ) idCluster(:,:,1:t) =  cno(t,i)
+              ! renumber all from 1 to t, 为何是1:t?
+              where ( idCluster(:,:,1:t) == cno(t-1,j) ) idCluster(:,:,1:t) =  cno(t,i) ! 空间上编号更新
               ! rename cluster id from cno
-              where ( cno(1:t,:) == cno(t-1,j) ) cno(1:t,:) = cno(t,i)
+              where ( cno(1:t,:) == cno(t-1,j) ) cno(1:t,:) = cno(t,i) ! 更新成现在的编号
            end if
         end do
      end do
@@ -222,6 +223,8 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
   !
   ! 3. final consolidated list
   nClusters = count(cnoList > 0)
+
+  IF( allocated(shortCnoList) )  deallocate( shortCnoList ) 
   allocate ( shortCnoList(nClusters) )
   shortCnoList = pack(cnoList, mask = cnoList > 0)
   !
