@@ -1,15 +1,13 @@
 PKG_FCFLAGS="-fno-stack-protector"
 
 FC = gfortran
-CC = g++
+CC = gcc
 
-ifdef DEBUG
-  DLLFLAGS=
-  DEBUGFLAG=-gdwarf-2
-else
-  DLLFLAGS=-s
-  DEBUGFLAG=
-endif
+
+R_XTRA_CPPFLAGS = -I"$(R_HOME)/include" -DNDEBUG
+ALL_CFLAGS = $(R_XTRA_CFLAGS) $(PKG_CFLAGS) $(CPICFLAGS) $(SHLIB_CFLAGS) $(CFLAGS)
+ALL_CPPFLAGS = $(R_XTRA_CPPFLAGS) $(PKG_CPPFLAGS) $(CLINK_CPPFLAGS) $(CPPFLAGS) $($*-CPPFLAGS) $(LOCAL_CPPFLAGS)
+
 # FCFLAGS = -O2 $(DEBUGFLAG) -mtune=generic
 
 FILEf_src := $(wildcard *.f90)   
@@ -19,7 +17,8 @@ FILEf_obj := $(patsubst %f90, %o, $(FILEf_src))
 FILEc_src := $(wildcard *.c)
 FILEc_obj := $(patsubst %c, %o, $(FILEc_src)) 
 
-OBJS := mo_julian.o mo_percentile.o mo_smi_constants.o mo_sort.o mo_utils.o  
+utils:= mo_utils2.o 
+OBJS := mo_julian.o mo_percentile.o mo_smi_constants.o mo_sort.o ${utils}
 SRCS := $(patsubst %o, %f90, $(OBJS)) 
 MODS := $(patsubst %o, %mod, $(OBJS)) 
 # ALL:FILEf_obj,FILEc_obj
@@ -31,11 +30,21 @@ MODS := $(patsubst %o, %mod, $(OBJS))
 # global.o: global.f90
 #    ifort -c global.f90
 
-ALL: mo_drought_evaluation.o register_routines.o
+# C_OBJS = fortloopc.o
+# FT_OBJS = fortloopf.o
+
+all: mo_drought_evaluation.o register_routines.o
+
+# fortloop.mod: fortloopf.o
+# fortloopc.o: fortloop.mod
+
+register_routines.o: register_routines.c mo_drought_evaluation.mod
+	$(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) -c $< -o $@
+
+mo_drought_evaluation.mod: mo_drought_evaluation.o
 
 # all: $(SHLIB)
-mo_drought_evaluation.o: mo_drought_evaluation.f90 \
-	InputOutput.o mo_percentile.o mo_sort.o mo_smi_constants.o mo_utils.o 
+mo_drought_evaluation.o: mo_drought_evaluation.f90 InputOutput.o mo_percentile.o mo_sort.o mo_smi_constants.o ${utils}
 	$(FC) $(FCFLAGS) -c -o $@ $<
 
 InputOutput.o: InputOutput.f90 mo_kind.o mo_global_variables.o
@@ -55,9 +64,6 @@ $(OBJS): $(SRCS)
 mo_kind.o: mo_kind.f90
 	$(FC) $(FCFLAGS) -c $<
 
-register_routines.o: register_routines.c
-	$(CC) $(CFLAGS) -c $<
-
 # echo ${SRCS}, ${OBJS}
 # @echo "#" $(FC) $(FCFLAGS) -c $< mo_kind.o
 # mo_global_variables.o: mo_global_variables.f90 mo_kind.o
@@ -69,7 +75,7 @@ register_routines.o: register_routines.c
 # 	 $(FC) $(FCFLAGS) $(objects) -o $@
 
 clean:  
-	rm -f *.o *.mod $(TARGET)
+	@rm -rf *.mod *.o
 
 # $@    the file name of the target
 # $<    the name of the first prerequisite (i.e., dependency)
@@ -78,3 +84,14 @@ clean:
 # $(@F)    the file part of the target
 # $(<D)    the directory part of the first prerequisite (i.e., dependency)
 # $(<F)    the file part of the first prerequisite (i.e., dependency)
+
+# c:/Rtools/mingw_64/bin/g++  -std=gnu++11 -I"C:/PROGRA~1/R/R-36~1.1/include" -DNDEBUG  
+# 	-I"D:/Documents/R/win-library/3.6/Rcpp/include" 
+# 	-I"D:/Documents/R/win-library/3.6/RcppArmadillo/include"     
+# 	-fopenmp    -O2 -Wall  -mtune=generic -c wTSM.cpp -o wTSM.o
+# c:/Rtools/mingw_64/bin/g++ -shared -s -static-libgcc -o 
+# 	phenofit.dll tmp.def RcppExports.o register_routines.o season.o smooth_wSG.o \
+# 	smooth_whit.o wTSM.o -fopenmp 
+# 	-LC:/PROGRA~1/R/R-36~1.1/bin/x64 
+# 	-lRlapack -LC:/PROGRA~1/R/R-36~1.1/bin/x64 -lRblas -lgfortran -lm -lquadmath 
+# 	-LC:/PROGRA~1/R/R-36~1.1/bin/x64 -lR

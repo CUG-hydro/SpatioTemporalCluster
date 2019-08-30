@@ -4,12 +4,11 @@ MODULE mo_drought_evaluation
 
   IMPLICIT NONE
 
-  PRIVATE
-
-  PUBLIC :: droughtIndicator
-  PUBLIC :: ClusterEvolution
-  PUBLIC :: ClusterStats
-  PUBLIC :: calSAD
+  ! PRIVATE
+  ! PUBLIC :: droughtIndicator
+  ! PUBLIC :: ClusterEvolution
+  ! PUBLIC :: ClusterStats
+  ! PUBLIC :: calSAD
 
   ! ------------------------------------------------------------------
 
@@ -25,7 +24,7 @@ CONTAINS
 !  Luis Samaniego, created  28.02.2011
 !                  updated  05.10.2011
 !*********************************************************************
-subroutine droughtIndicator( SMI, mask, SMI_thld, cellCoor , SMIc)
+subroutine droughtIndicator( SMI, mask, SMI_thld, cellCoor , SMIc) bind(C, name="droughtindicator_")
 
   use mo_smi_constants, only : nodata_sp, nodata_i4
   use mo_utils,         only : lesserequal, notequal
@@ -36,8 +35,11 @@ subroutine droughtIndicator( SMI, mask, SMI_thld, cellCoor , SMIc)
   real(sp),    dimension(:,:),                intent(in)  :: SMI
   logical,     dimension(:,:),                intent(in)  :: mask
   real(sp),                                   intent(in)  :: SMI_thld
-  integer(i4), dimension(:,:), allocatable,   intent(out) :: cellCoor
-  integer(i4), dimension(:,:,:), allocatable, intent(out) :: SMIc       ! Drought indicator
+  ! integer(i4), dimension(:,:), allocatable,   intent(out) :: cellCoor
+  ! integer(i4), dimension(:,:,:), allocatable, intent(out) :: SMIc       ! Drought indicator
+  
+  integer(i4), dimension(count(mask), 2),   intent(out) :: cellCoor
+  integer(i4), dimension(size(mask, 1), size(mask, 2), size(SMI, 2)), intent(out) :: SMIc       ! Drought indicator
   
   ! local variables
   real(sp), dimension(size(mask, dim=1),&
@@ -52,8 +54,9 @@ subroutine droughtIndicator( SMI, mask, SMI_thld, cellCoor , SMIc)
   ncols   = size( mask, 2 )
   nMonths = size( SMI,  2 )
   !
-  print *, 'Threshold for drought identification: ', SMI_thld
-  allocate ( SMIc( nrows, ncols, nMonths) )
+  ! print *, 'Threshold for drought identification: ', SMI_thld
+  ! allocate ( SMIc( nrows, ncols, nMonths) )
+  ! allocate ( cellCoor( count(mask), 2) )
   
   do m = 1, nMonths
      dummy_2d_sp = unpack(SMI(:,m), mask, nodata_sp)
@@ -69,7 +72,6 @@ subroutine droughtIndicator( SMI, mask, SMI_thld, cellCoor , SMIc)
   end do
 
   !
-  allocate (cellCoor( count(mask),2 ))
   k = 0
   do j=1,ncols
      do i=1,nrows
@@ -98,8 +100,7 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
   use InputOutput, only                                : idCluster, &
                                                          shortCnoList, &
                                                          nClusters
-                                                         
- 
+         
  implicit none
 
   ! input variables
