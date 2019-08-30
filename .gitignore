@@ -4,4 +4,7 @@ temp/
 src/CMakeFiles/
 *.zip
 *.o
+*.so
+*.dll
+
 *.mod

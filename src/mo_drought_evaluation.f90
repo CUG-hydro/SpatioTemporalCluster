@@ -24,7 +24,9 @@ CONTAINS
 !  Luis Samaniego, created  28.02.2011
 !                  updated  05.10.2011
 !*********************************************************************
-subroutine droughtIndicator( SMI, mask, SMI_thld, cellCoor , SMIc) bind(C, name="droughtindicator_")
+subroutine droughtIndicator( SMI, mask, SMI_thld, &
+  nrows, ncols, nMonths, &
+  cellCoor, SMIc) bind(C, name="droughtindicator_")
 
   use mo_smi_constants, only : nodata_sp, nodata_i4
   use mo_utils,         only : lesserequal, notequal
@@ -32,29 +34,38 @@ subroutine droughtIndicator( SMI, mask, SMI_thld, cellCoor , SMIc) bind(C, name=
   implicit none
 
   ! input variable
-  real(sp),    dimension(:,:),                intent(in)  :: SMI
-  logical,     dimension(:,:),                intent(in)  :: mask
-  real(sp),                                   intent(in)  :: SMI_thld
+  ! real(sp),    dimension(:,:),                intent(in)  :: SMI
+  ! logical,     dimension(:,:),                intent(in)  :: mask
+  integer(i4),                                  intent(in) :: nrows
+  integer(i4),                                  intent(in) :: ncols
+  integer(i4),                                  intent(in) :: nMonths
+  
+  real(sp)   , dimension(nrows*ncols, nMonths), intent(in) :: SMI
+  logical    , dimension(nrows, ncols),         intent(in) :: mask
+  real(sp)   ,                                  intent(in) :: SMI_thld
+
+  integer(i4), dimension(count(mask), 2),        intent(out) :: cellCoor
+  integer(i4), dimension(nrows, ncols, nMonths), intent(out) :: SMIc
+  
   ! integer(i4), dimension(:,:), allocatable,   intent(out) :: cellCoor
   ! integer(i4), dimension(:,:,:), allocatable, intent(out) :: SMIc       ! Drought indicator
-  
-  integer(i4), dimension(count(mask), 2),   intent(out) :: cellCoor
-  integer(i4), dimension(size(mask, 1), size(mask, 2), size(SMI, 2)), intent(out) :: SMIc       ! Drought indicator
+  ! integer(i4), dimension(count(mask), 2),   intent(out) :: cellCoor
+  ! integer(i4), dimension(size(mask, 1), size(mask, 2), size(SMI, 2)), intent(out) :: SMIc       ! Drought indicator
   
   ! local variables
   real(sp), dimension(size(mask, dim=1),&
                       size(mask, dim=2))        :: dummy_2d_sp
   integer(i4)                                   :: i, j, m, k
-  integer(i4)                                   :: nrows
-  integer(i4)                                   :: ncols
-  integer(i4)                                   :: nMonths
-
+  
   ! initialize
-  nrows   = size( mask, 1 )
-  ncols   = size( mask, 2 )
-  nMonths = size( SMI,  2 )
+  ! nrows   = size( mask, 1 )
+  ! ncols   = size( mask, 2 )
+  ! nMonths = size( SMI,  2 )
   !
-  ! print *, 'Threshold for drought identification: ', SMI_thld
+  print *, 'Threshold for drought identification: ', SMI_thld
+  print *, "nrow, ncol, ncol = ", nrows, ncols, nMonths
+  print *, mask
+  
   ! allocate ( SMIc( nrows, ncols, nMonths) )
   ! allocate ( cellCoor( count(mask), 2) )
   
@@ -71,10 +82,10 @@ subroutine droughtIndicator( SMI, mask, SMI_thld, cellCoor , SMIc) bind(C, name=
      end where
   end do
 
-  !
   k = 0
   do j=1,ncols
      do i=1,nrows
+        print *, "mask(i, j) = ", mask(i, j)
         if ( mask(i,j)) then
            k = k + 1
            cellCoor(k,1) = i
@@ -92,7 +103,8 @@ end subroutine droughtIndicator
 !  PURPOSE:  cluster drought clusters in space and time
 !  DATE:     developed in Budapest, 10-11.03.2011
 !**********************************************************************
-subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCellInter, thCellClus)
+subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCellInter, thCellClus) & 
+  bind(C, name="clusterevolution_")
 
   ! use numerical_libraries, only                        : SVIGN
   use mo_sort,          only : sort
@@ -104,16 +116,17 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
  implicit none
 
   ! input variables
-  integer(i4), dimension(:,:,:),            intent(inout) :: SMIc     ! Drought indicator
+  ! integer(i4), dimension(:,:,:),            intent(inout) :: SMIc     ! Drought indicator
+  integer(i4), dimension(nrows,ncols,nMonths), intent(inout) :: SMIc    ! Drought indicator
   integer(i4),                              intent(in)    :: nrows
   integer(i4),                              intent(in)    :: ncols
   integer(i4),                              intent(in)    :: nMonths
-  integer(i4),                              intent(in)    :: nCells   ! number of effective cells
-  integer(i4), dimension(:,:), allocatable, intent(in)    :: cellCoor
-  integer(i4),                              intent(in)    :: thCellClus ! treshold  for cluster formation in space
+  integer(i4),                              intent(in)    :: nCells     ! number of effective cells
+  ! integer(i4), dimension(:,:), allocatable, intent(in)    :: cellCoor
+  integer(i4), dimension(nCells,2),         intent(in)    :: cellCoor
   integer(i4),                              intent(in)    :: nCellInter ! number cells for joining clusters in time
+  integer(i4),                              intent(in)    :: thCellClus ! treshold  for cluster formation in space
 
-  
   ! local variables
   integer(i4)                              :: i, j, t
   integer(i4), dimension(:),   allocatable :: nC

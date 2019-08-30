@@ -1,4 +1,4 @@
-PKG_FCFLAGS = $(SHLIB_OPENMP_FFLAGS)
+# PKG_FCFLAGS = $(SHLIB_OPENMP_FFLAGS)
 PKG_FCFLAGS="-fno-stack-protector"
 PKG_CFLAGS="-fno-stack-protector"
 
@@ -15,7 +15,8 @@ SRCS := $(patsubst %o, %f90, $(OBJS))
 all:
 	# echo @$(MAKE) $(SHLIB)
 	@$(MAKE) $(SHLIB)
-	# @rm -f *.mod *.o
+	@rm -f *.mod *.o 
+	#*.dll *.so
 
 $(SHLIB): $(OBJS) ${C_OBJS}
 
