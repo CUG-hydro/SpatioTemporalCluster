@@ -1,0 +1,57 @@
+----------------------------------------
+        MAKE TEST
+----------------------------------------
+
+To run all the test cases type 
+
+     $ cd check/
+     $ ./check_SMI_cases
+
+on your command line. If test case was running properly, i.e. is 
+consistent with the pre-defined output, command line output will be 
+
+     $ case #[id] o.k. 
+
+otherwise, if the test scenario failed either during runtime or 
+because of inconsistent output 
+
+     $ case #[id] failed
+
+will be written on standard output. Additionally, you will find a file
+standard.output in each specific test case folder case_[id]/ containing the 
+SMI print-outs. Inspecting this file might help you to find the reason 
+of failure. You can use 'check_SMI_cases clean' to clean up the case
+directories.
+Only if all test cases pass the make test, you can use the EDgE
+modelling chain
+
+Please be aware that the test cases only include switches specified 
+within a namelist. This means that you should run "./check_SMI_cases" with 
+the Makefile setting for
+
+    (1a) compiler = gnu
+    (1b) compiler = nag
+    (1c) compiler = intel
+    (2a) openmp   = true
+    (2b) openmp   = false
+
+----------------------------------------
+        TEST CASES
+----------------------------------------
+
+case 1 :: calculate SMI for SM
+
+case 2 :: Read kernel from previously calculated SMI file
+
+case 3 :: Read kernel and data for one dataset and apply it to another
+
+case 4 :: calculate daily SMI for a portion of the year
+
+case 5 :: invert daily SMI of case 4
+
+case 6 :: cluster calculation for SMI values calculated in case 1
+
+# -------------------------------------------------------------------------------------------
+#
+# Copyright 2014-2019 Juliane Mai, Stephan Thober
+#

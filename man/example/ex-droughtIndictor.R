@@ -17,7 +17,7 @@ mode(mat) <- "single"
 
 r <- droughtIndicatorR( mat, mask, SMI_thld)
 
-r2 <- ClusterEvolution(r[[8]], r[[7]])
+r2 <- ClusterEvolution(r$SMIc, r$cellCoor)
 
 # r <- .Fortran("__mo_drought_evaluation_MOD_droughtindicator", mat, mask, SMI_thld, cellCoor, SMIc, PACKAGE = "SMI2")
 # 

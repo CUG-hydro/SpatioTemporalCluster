@@ -2,10 +2,16 @@
 
 #' droughtIndicator
 #' 
+#' Return a drought status array with 0 (non-drought), 1 (drought), -9999 (NA).
+#'  
 #' @param mat double matrix, with the dim of `[ngrid, nmonth]`, (`ngrid = nrow*ncol`). 
 #' SMI drought index.
 #' @param mask logical matrix, `[nrow, ncol]`.
 #' @param SMI_thld double number, 
+#' 
+#' @return 
+#' * SMIc a drought status array with 0 (non-drought), 1 (drought), -9999 (NA).
+#' * cellCoor index of masked region.
 #' 
 #' @example man/example/ex-droughtIndictor.R
 #' @export

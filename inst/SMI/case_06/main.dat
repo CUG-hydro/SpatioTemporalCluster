@@ -1,0 +1,75 @@
+! Emacs: -*- mode: f90 -*-
+!***DROUGHT-INDEX        *** Main configuration file ***
+&mainconfig
+ ! mask to define the domain for which the SMI calculation or clustering is performed (optional)
+ maskfName      = "XXX" ! "../input_for_check/mask.nc"
+ mask_vname     = "XXX"
+ ! file and variable name for monthly soil moisture fileds
+ soilmoist_file = "XXX"
+ SM_vname       = "XXX"
+ ! directory iti which output will be written
+ outpath        = "output/"
+
+ ! SMI time steps per year
+ ! 12          == SM is monthly
+ ! 365         ==  SM is daily
+ nCalendarStepsYear = 12
+ ! lag for daily inputs
+ ! 0           ==  for number_time_steps_year = 12
+ ! 0, 7, 31    ==  for daily values (no lag, weekly, monthly)
+ lag = 0
+
+
+ ! Determination of the kernel width:
+ ! silverman_h == .TRUE.  - 'Silverman rule' is applied for determination of the kernel width - no optimization
+ ! silverman_h == .FALSE. - optimization of the kernel width 
+ silverman_h    = .True.
+
+ ! *** Analysis options which can be activated or deactivated ****
+ ! if  .TRUE. kernel widths h are read from variable "opt_h_vname" in file "opt_h_file with"
+ ! if .FALSE. kernel widths are optimized or determined by 'Silverman rule', "opt_h_file" and "opt_h_vname" are ignored
+ read_opt_h     = .False.
+ opt_h_file     = "../input_for_check/cdf_info_invert.nc"
+ opt_h_vname    = "kernel_width"
+ opt_h_sm_vname = "SM"
+
+ ! -----------------------------------------------------------------------------
+ !
+ ! Invert SMI cdf
+ !
+ ! If .True., then SMI values are read from ext_smi_file. These are transformed
+ ! to soil moisture saturation using the cdf created by soilmoist_file.
+ invert_SMI = .False.
+
+ ! -----------------------------------------------------------------------------
+ !
+ ! External SMI
+ !
+ ! To invert SMI values and for the clustering, SMI values can be provided
+ ! in an external file. For the clustering, this deactivates the SMI estimation,
+ ! which saves some time.
+ ext_smi      = .TRUE.
+ ext_smi_file = '../input_for_check/SMI.nc'
+
+ ! -----------------------------------------------------------------------------
+ ! if .TRUE. cluster analysis should be performed
+ do_cluster         = .True.
+ ! SMI - treshhold of for defining drought conditions
+ SMI_thld            = 0.20
+ ! cellsize (edge length) of the grid im [km]
+ cellsize            = 4.0
+ ! threshold for cluster formation in space cellsize**2 * thCellClus ~ 640 km2
+ thCellClus          = 4
+ ! number cells for joining clusters in time ~ 6400
+ nCellInter          = 40
+ ! number of cells per area interval
+ deltaArea           = 10
+
+ ! if .TRUE. SMI is evaluated for subregions (e.g. basins) -
+ ! ****CURRENTLY NOT WORKING
+ basin_flag     = .FALSE.       
+ basinfName     = "./test_smi/basin.nc"
+ basin_vname    = "basins"
+! ****CURRENTLY NOT WORKING
+/ !end
+

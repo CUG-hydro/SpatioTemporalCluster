@@ -8,3 +8,5 @@ src/CMakeFiles/
 *.dll
 
 *.mod
+github/
+src/netcdff/
