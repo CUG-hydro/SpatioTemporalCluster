@@ -10,3 +10,5 @@ src/CMakeFiles/
 *.mod
 github/
 src/netcdff/
+*.pdf
+fort.6

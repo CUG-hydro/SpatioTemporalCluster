@@ -1,3 +1,4 @@
+devtools::load_all()
 library(SMI)
 
 set.seed(1)
@@ -5,24 +6,28 @@ set.seed(1)
 nrow <- 10
 ncol <- 10
 ngrid <- nrow*ncol
-ntime <- 1
+ntime <- 12
 
-mat <- matrix(rnorm(nrow*ncol), ngrid, ntime)
+mat <- matrix(rnorm(nrow*ncol*ntime), ngrid, ntime)
 mask <- matrix(mat[,1], nrow, ncol) > 0.5
 SMI_thld <- 0.2
 
-mode(mat) <- "single"
-# cellCoor <- matrix(0L, nrow, ncol)
-# SMIc <- array(0, dim = c(nrow, ncol, ntime))
+# system.time(
+# )
+r  <- droughtIndicatorR( mat, mask, SMI_thld)    
+r_cluster <- ClusterEvolution(r$SMIc, r$cellCoor)
+r_status  <- ClusterStats(mat, mask, SMI_thld, r_cluster$idCluster, r_cluster$shortCnoList)
 
-r <- droughtIndicatorR( mat, mask, SMI_thld)
 
-r2 <- ClusterEvolution(r$SMIc, r$cellCoor)
+mat <- r2$idCluster
+microbenchmark::microbenchmark(
+    alply(mat, 3, function(x) unique(as.numeric(x))), 
+    unique(as.numeric(mat))
+)
 
-# r <- .Fortran("__mo_drought_evaluation_MOD_droughtindicator", mat, mask, SMI_thld, cellCoor, SMIc, PACKAGE = "SMI2")
-# 
-# library(foreach)
-# foreach(pkg = packages)  %do% {
-#     cmd <- sprintf("git clone https://github.com/cran/%s github/%s", pkg, pkg)
-#     shell(cmd)
-# }
+
+p <- plot.cluster(r2)
+ratio = 0.8
+# devtools::install_github("kongdd/Ipaper")
+Ipaper::write_fig(p, "a.pdf", 12*ratio, 8*ratio)
+## 2. visualization ------------------------------------------------------------

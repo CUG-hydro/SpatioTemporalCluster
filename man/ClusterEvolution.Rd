@@ -4,7 +4,7 @@
 \alias{ClusterEvolution}
 \title{ClusterEvolution}
 \usage{
-ClusterEvolution(SMIc, cellCoor, thCellClus = 1, nCellInter = 1)
+ClusterEvolution(SMIc, cellCoor, thCellClus = 1L, nCellInter = 1L)
 }
 \arguments{
 \item{SMIc}{integer array, `[nrow, ncol, ntime]`}

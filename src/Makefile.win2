@@ -74,8 +74,9 @@ mo_kind.o: mo_kind.f90
 # $(TARGET):$(objects)
 # 	 $(FC) $(FCFLAGS) $(objects) -o $@
 
+.PHONY: clean
 clean:  
-	@rm -rf *.mod *.o
+	@rm -f *.mod *.o *.dll *.so
 
 # $@    the file name of the target
 # $<    the name of the first prerequisite (i.e., dependency)

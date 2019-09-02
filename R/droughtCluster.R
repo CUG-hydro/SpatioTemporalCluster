@@ -15,7 +15,7 @@
 #' 
 #' @example man/example/ex-droughtIndictor.R
 #' @export
-droughtIndicatorR <- function(mat, mask, SMI_thld){
+droughtIndicator <- function(mat, mask, SMI_thld){
     dim1 <- dim(mat)
     dim2 <- dim(mask)
     
@@ -34,12 +34,9 @@ droughtIndicatorR <- function(mat, mask, SMI_thld){
     r <- .Fortran("droughtindicator", mat, mask, as.single(SMI_thld), 
                   nrows, ncols, nMonths,
                   cellCoor, SMIc)
-
-    n <- length(r)
-    ans <- r[c(n, n-1)] 
     # names(r) <- c("mat", "mask", "thld", "cellCoor", "SMIc")
     # .Fortran("droughtIndicator", SMI, mask, SMI_thld, )
-    setNames(ans, c("SMIc", "cellCoor"))    
+    setNames(last(r, 2)[2:1], c("SMIc", "cellCoor"))    
 }
 
 
@@ -55,6 +52,7 @@ droughtIndicatorR <- function(mat, mask, SMI_thld){
 #' @author
 #' Budapest, 10-11.03.2011
 #' 
+#' @import magrittr
 #' @export
 ClusterEvolution <- function(SMIc, cellCoor, thCellClus = 1L, nCellInter = 1L){
     dim     <- dim(SMIc) 
@@ -65,19 +63,25 @@ ClusterEvolution <- function(SMIc, cellCoor, thCellClus = 1L, nCellInter = 1L){
     
     mode(SMIc)     <- "integer"
     mode(cellCoor) <- "integer"
-    
-    r <- .Fortran("ClusterEvolution", 
+
+    idCluster = array(-9999L, dim = c(nrows, ncols, nMonths))
+    nCluster  = 0L
+    r <- .Fortran("clusterevolution", 
                   SMIc, nrows, ncols, nMonths, nCells, cellCoor, 
-                  as.integer(nCellInter), as.integer(thCellClus))
+                  as.integer(nCellInter), as.integer(thCellClus), 
+                  idCluster, nCluster)
+    r <- setNames(last(r, 2), c("idCluster", "nCluster"))
+    # idCluster2 <- last(r)
+    # r$idCluster[r$idCluster == -9999L] = NA_integer_
+    shortCnoList   <- unique(as.numeric(r$idCluster)) %>% sort() %>% as.integer()
+    r$shortCnoList <- shortCnoList[shortCnoList != -9999L]
+
+    if (length(r$shortCnoList) != r$nCluster) {
+        stop("[e]: shortCnoList not equal to nCluster!")
+    }
+    # idCluster2
     r
 }
-
-
-
-findClusters <- function(cellCoor, thCellClus, t,iC,nCluster, nrows, ncols, nCells, SMIc){
-}
-
-
 
 # #' @export
 # Fpi <- function(DARTS, ROUNDS) {
@@ -95,3 +99,12 @@ make_clean <- function(){
 }
 
 # bsamgp
+
+last <- function(x, len = 1){
+    n <- length(x)
+    if (len == 1) {
+        x[[n]]
+    } else {
+        x[seq(n - len + 1, n)]
+    }
+}

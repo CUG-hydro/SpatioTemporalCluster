@@ -45,6 +45,11 @@ module InputOutput
 
 contains
 
+! del statistic variables
+subroutine delStatistics()
+  deallocate(DAreaEvol, DTMagEvol, aDD, aDA, TDM, dASevol, &
+    eIdPerm, eventId)
+end subroutine delStatistics
 
 !**********************************************************************
 !    PURPOSE    WRITE Results of the cluster analysis
