@@ -1,5 +1,10 @@
-
 #' Calculate drought status
+#' 
+#' @inheritParams droughtIndicator
+#' @inheritParams ClusterEvolution
+#' @param idCluster array of cluster num_id, with the dim `[nrow, ncol, ntime]`.
+#' @param shortCnoList vector, cluster num_id
+#' @param mGridArea matrix of grid area
 #' 
 #' @export
 ClusterStats <- function(mat, mask, SMI_thld, 

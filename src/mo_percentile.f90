@@ -285,7 +285,7 @@ CONTAINS
        allocate(arr(n))
        arr = pack(arrin,mask)
 
-       if (n < 2) stop 'median_dp: n < 2'
+       ! if (n < 2) stop 'median_dp: n < 2'
 
        if (mod(n,2) == 0) then ! Even
           median_dp = n_element(arr,n/2+1,previous=tmp)
@@ -297,7 +297,7 @@ CONTAINS
        deallocate(arr)
     else
        n = size(arrin)
-       if (n < 2) stop 'median_dp: n < 2'
+       ! if (n < 2) stop 'median_dp: n < 2'
 
        if (mod(n,2) == 0) then ! Even
           median_dp = n_element(arrin,n/2+1,previous=tmp)
@@ -327,7 +327,7 @@ CONTAINS
        allocate(arr(n))
        arr = pack(arrin,mask)
 
-       if (n < 2) stop 'median_sp: n < 2'
+       ! if (n < 2) stop 'median_sp: n < 2'
 
        if (mod(n,2) == 0) then ! Even
           median_sp = n_element(arr,n/2+1,previous=tmp)
@@ -339,7 +339,7 @@ CONTAINS
        deallocate(arr)
     else
        n = size(arrin)
-       if (n < 2) stop 'median_sp: n < 2'
+       ! if (n < 2) stop 'median_sp: n < 2'
 
        if (mod(n,2) == 0) then ! Even
           median_sp = n_element(arrin,n/2+1,previous=tmp)
@@ -381,8 +381,8 @@ CONTAINS
        dat = idat
     endif
 
-    if (n < 1)  stop 'n_element_dp: n < 1'
-    if (n > nn) stop 'n_element_dp: n > size(pack(dat,mask))'
+    ! if (n < 1)  stop 'n_element_dp: n < 1'
+    ! if (n > nn) stop 'n_element_dp: n > size(pack(dat,mask))'
 
     dat = idat
     nn = size(dat)
@@ -456,8 +456,8 @@ CONTAINS
        dat = idat
     endif
 
-    if (n < 1)  stop 'n_element_sp: n < 1'
-    if (n > nn) stop 'n_element_sp: n > size(pack(dat,mask))'
+    ! if (n < 1)  stop 'n_element_sp: n < 1'
+    ! if (n > nn) stop 'n_element_sp: n > size(pack(dat,mask))'
 
     dat = idat
     nn = size(dat)
@@ -533,7 +533,7 @@ CONTAINS
        mode = 1_i4
     end if
 
-    if (n < 2) stop 'percentile_0d_dp: n < 2'
+    ! if (n < 2) stop 'percentile_0d_dp: n < 2'
 
     select case (mode)
        ! Inverse empirical CDF: Mathematica default
@@ -586,7 +586,7 @@ CONTAINS
 
        ! No valid mode
     case default
-       stop 'percentile_0d_dp: mode > 8 not implemented'
+       ! stop 'percentile_0d_dp: mode > 8 not implemented'
 
     end select
 
@@ -644,7 +644,7 @@ CONTAINS
        mode = 1_i4
     end if
 
-    if (n < 2) stop 'percentile_0d_sp: n < 2'
+    ! if (n < 2) stop 'percentile_0d_sp: n < 2'
 
     select case (mode)
        ! Inverse empirical CDF: Mathematica default
@@ -697,7 +697,7 @@ CONTAINS
 
        ! No valid mode
     case default
-       stop 'percentile_0d_sp: mode > 8 not implemented'
+       ! stop 'percentile_0d_sp: mode > 8 not implemented'
 
     end select
 
@@ -760,7 +760,7 @@ CONTAINS
 
     ! check consistency
     !if (size(k) > size(arr)) stop 'percentile_1d_dp: more Quantiles than data: size(k) > size(arr)'
-    if (n < 2) stop 'percentile_1d_dp: n < 2'
+    ! if (n < 2) stop 'percentile_1d_dp: n < 2'
 
     select case (mode)
        ! Inverse empirical CDF: Mathematica default
@@ -813,7 +813,7 @@ CONTAINS
 
        ! No valid mode
     case default
-       stop 'percentile_1d_dp: mode > 8 not implemented'
+       ! stop 'percentile_1d_dp: mode > 8 not implemented'
 
     end select
 
@@ -880,7 +880,7 @@ CONTAINS
 
     ! check consistency
     !if (size(k) > size(arr)) stop 'percentile_1d_sp: more Quantiles than data: size(k) > size(arr)'
-    if (n < 2) stop 'percentile_1d_sp: n < 2'
+    ! if (n < 2) stop 'percentile_1d_sp: n < 2'
 
     select case (mode)
        ! Inverse empirical CDF: Mathematica default
@@ -933,7 +933,7 @@ CONTAINS
 
        ! No valid mode
     case default
-       stop 'percentile_1d_sp: mode > 8 not implemented'
+       ! stop 'percentile_1d_sp: mode > 8 not implemented'
 
     end select
 

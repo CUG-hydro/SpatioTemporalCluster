@@ -4,9 +4,13 @@
 \name{SMI-package}
 \alias{SMI}
 \alias{SMI-package}
-\title{SMI: What the Package Does in One 'Title Case' Line}
+\title{SMI: SMI}
 \description{
 One paragraph description of what the package does as one
         or more full sentences.
+}
+\author{
+\strong{Maintainer}: Dongdong Kong \email{kongdd.sysu@gmail.com}
+
 }
 \keyword{internal}

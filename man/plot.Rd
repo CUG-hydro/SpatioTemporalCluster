@@ -4,14 +4,16 @@
 \alias{plot.cluster}
 \title{Plot drought cluster result}
 \usage{
-\method{plot}{cluster}(r2, x = NULL, y = NULL)
+\method{plot}{cluster}(idClusters, x = NULL, y = NULL, ...)
 }
 \arguments{
-\item{r2}{obj returned by [ClusterEvolution()]}
+\item{idClusters}{obj returned by \code{\link[=ClusterEvolution]{ClusterEvolution()}}}
 
 \item{x}{numeric vector, latitudes}
 
 \item{y}{numeric vector, longitudes}
+
+\item{...}{other parameters to \code{\link[lattice:levelplot]{lattice::levelplot()}}}
 }
 \description{
 Plot drought cluster result

@@ -411,7 +411,7 @@ CONTAINS
           arr(l+1) = arr(j)
           arr(j) = a
           jstack = jstack+2
-          if (jstack > NSTACK) stop 'sort_sp: NSTACK too small'
+          ! if (jstack > NSTACK) stop 'sort_sp: NSTACK too small'
           if (r-i+1 >= j-l) then
              istack(jstack)   = r
              istack(jstack-1) = i
@@ -483,7 +483,7 @@ CONTAINS
           arr(l+1) = arr(j)
           arr(j) = a
           jstack = jstack+2
-          if (jstack > NSTACK) stop 'sort_sp: NSTACK too small'
+          ! if (jstack > NSTACK) stop 'sort_sp: NSTACK too small'
           if (r-i+1 >= j-l) then
              istack(jstack)   = r
              istack(jstack-1) = i
@@ -553,7 +553,7 @@ CONTAINS
           arr(l+1) = arr(j)
           arr(j) = a
           jstack = jstack+2
-          if (jstack > NSTACK) stop 'sort_dp: NSTACK too small'
+          ! if (jstack > NSTACK) stop 'sort_dp: NSTACK too small'
           if (r-i+1 >= j-l) then
              istack(jstack)   = r
              istack(jstack-1) = i
@@ -630,7 +630,7 @@ CONTAINS
           sort_index_sp(l+1) = sort_index_sp(j)
           sort_index_sp(j)   = indext
           jstack = jstack+2
-          if (jstack > NSTACK) stop 'sort_index_sp: NSTACK too small'
+          ! if (jstack > NSTACK) stop 'sort_index_sp: NSTACK too small'
           if (r-i+1 >= j-l) then
              istack(jstack)   = r
              istack(jstack-1) = i
@@ -704,7 +704,7 @@ CONTAINS
           sort_index_dp(l+1) = sort_index_dp(j)
           sort_index_dp(j)   = indext
           jstack = jstack+2
-          if (jstack > NSTACK) stop 'sort_index_dp: NSTACK too small'
+          ! if (jstack > NSTACK) stop 'sort_index_dp: NSTACK too small'
           if (r-i+1 >= j-l) then
              istack(jstack)   = r
              istack(jstack-1) = i
@@ -780,7 +780,7 @@ CONTAINS
           sort_index_i4(l+1) = sort_index_i4(j)
           sort_index_i4(j)   = indext
           jstack = jstack+2
-          if (jstack > NSTACK) stop 'sort_index_i4: NSTACK too small'
+          ! if (jstack > NSTACK) stop 'sort_index_i4: NSTACK too small'
           if (r-i+1 >= j-l) then
              istack(jstack)   = r
              istack(jstack-1) = i

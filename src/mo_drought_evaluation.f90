@@ -66,11 +66,17 @@ subroutine droughtIndicator( SMI, mask, SMI_thld, &
   ! allocate ( SMIc( nrows, ncols, nMonths) )
   ! allocate ( cellCoor( count(mask), 2) )
   
+  ! write (*, *) "========================"
+  ! write (*, "(10F9.2)") SMI
+  ! write (*, *) "========================"
+  ! write (*, "(10L6)") mask
+
   do m = 1, nMonths
      dummy_2d_sp = unpack(SMI(:,m), mask, nodata_sp)
      ! filter for possible error within domain
      ! where (SMI(:,:,m) .le. SMI_thld .and. SMI(:,:,m) .ne. nodata_sp )
-     
+     ! write (*, *) "========================"
+     ! write (*, "(10F9.2)") dummy_2d_sp
      where ( (lesserequal(dummy_2d_sp, SMI_thld)) .and. (notequal(dummy_2d_sp, nodata_sp)) )
         SMIc(:,:,m) = 1
      elsewhere ( notequal(dummy_2d_sp, nodata_sp) )
@@ -246,6 +252,7 @@ subroutine ClusterStats( SMI, mask, nrows, ncols, nMonths, nCells, SMI_thld, mGr
   ! bind(C, name="clusterstats_")
 
   !  use numerical_libraries, only                       : SVIGN , DSVRGN, DEQTIL
+  use mo_weight
   use mo_sort,          only : sort_index
 
   use mo_smi_constants, only: nodata_sp
@@ -271,6 +278,7 @@ subroutine ClusterStats( SMI, mask, nrows, ncols, nMonths, nCells, SMI_thld, mGr
 
   ! local variables
   real(sp), dimension(nrows, ncols)                         :: dummy_2d_sp
+  logical , dimension(nrows, ncols)                         :: dummy_mask
   integer(i4)                                               :: ic, i
   integer(i4)                                               :: t
   integer(i4) , dimension(:), allocatable                   :: counterA
@@ -311,7 +319,10 @@ subroutine ClusterStats( SMI, mask, nrows, ncols, nMonths, nCells, SMI_thld, mGr
         !
         !  drought area evolution
         !  TODO: area-weighted
-        DAreaEvol(t,ic) =  real( count(idCluster(:,:,t) == shortCnoList(ic) ), dp) / real(nCells, dp)
+        dummy_mask = idCluster(:,:,t) == shortCnoList(ic)
+
+        DAreaEvol(t,ic) = sum( pack(mGridArea,  dummy_mask) )
+        ! DAreaEvol(t,ic) = real( count(idCluster(:,:,t) == shortCnoList(ic) ), dp) ! / real(nCells, dp)
         if (DAreaEvol(t,ic) > 0.0_dp) counterA(ic) = counterA(ic) + 1
 
         ! total magnitude (NEW  SM_tr -SMI) !!!
@@ -321,8 +332,8 @@ subroutine ClusterStats( SMI, mask, nrows, ncols, nMonths, nCells, SMI_thld, mGr
         !   print *, dummy_2d_sp(:,:)
         !   print *, SMI_thld - dummy_2d_sp(:,:)
         ! end
-        
-        DTMagEvol(t,ic) = sum( (SMI_thld - dummy_2d_sp), mask = idCluster(:,:,t) == shortCnoList(ic) )
+        DTMagEvol(t,ic) = wsum_mat( (SMI_thld - dummy_2d_sp), mGridArea, dummy_mask )
+        ! DTMagEvol(t,ic) = sum( (SMI_thld - dummy_2d_sp), mask = dummy_mask)
      end do
 
      ! AVERAGE (MEAN) DURATION

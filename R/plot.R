@@ -3,13 +3,14 @@
 #' @param idClusters obj returned by [ClusterEvolution()]
 #' @param x numeric vector, latitudes
 #' @param y numeric vector, longitudes
+#' @param ... other parameters to [lattice::levelplot()]
 #' 
 #' @importFrom scales alpha
 #' @import data.table
 #' @import lattice
 #' 
-#' @export plot.cluster
-plot.cluster <- function(idClusters, x = NULL, y = NULL){
+#' @rdname plot
+plot.cluster <- function(idClusters, x = NULL, y = NULL, ...){
     dim   <- dim(idClusters)
     nrow  <- dim[1]
     ncol  <- dim[2]
@@ -29,7 +30,7 @@ plot.cluster <- function(idClusters, x = NULL, y = NULL){
     scale <- list(at = pos_grid, labels = pos_grid - 0.5)
     p <- levelplot(value ~ x*y | time, df, as.table = TRUE, 
             scales = list(x = scale, y = scale), 
-            layout = c(4, 3),
+            ...,
             panel = function(x, y, z, subscripts, ...){
                 lty = 1
                 lwd = 0.4
@@ -48,6 +49,11 @@ plot.cluster <- function(idClusters, x = NULL, y = NULL){
             })
     p
 }
+
+# #' @importFrom methods isGeneric
+# #' @export
+# plot <- function(x, y, ...) if (!isGeneric("plot")) UseMethod("plot")
+
 
 mid <- function(x){
     n <- length(x)

@@ -59,156 +59,156 @@ end subroutine delStatistics
 !               Created        Sa   17.03.2011
 !               Last Update    Sa
 !**********************************************************************
-subroutine WriteResultsCluster(SMIc, outpath, wFlag, yStart, yEnd, nMonths, nCells, &
-     deltaArea, cellsize, d)
+! subroutine WriteResultsCluster(SMIc, outpath, wFlag, yStart, yEnd, nMonths, nCells, &
+!      deltaArea, cellsize, d)
 
-  use mo_kind,          only : i4, dp
-  use mo_smi_constants, only : YearMonths
+!   use mo_kind,          only : i4, dp
+!   use mo_smi_constants, only : YearMonths
 
-  !
-  implicit none
+!   !
+!   implicit none
 
-  ! input variables
-  character(len=*),      intent(in)        :: outpath     ! ouutput path for results
-  integer(i4), dimension(:,:,:),intent(in) :: SMIc        ! Drought indicator 1 - is under drought
-  integer(i4),           intent(in)        :: wFlag
-  integer(i4),           intent(in)        :: yStart
-  integer(i4),           intent(in)        :: yEnd
-  integer(i4),           intent(in)        :: nMonths
-  integer(i4),           intent(in)        :: nCells      
-  integer(i4),           intent(in)        :: deltaArea   ! Area of 1*1 grid
-  real(sp),              intent(in)        :: cellsize    ! grid cellsize
-  integer(i4), optional, intent(in)        :: d
-  real(dp), parameter                      :: eps = 1.0e-5_dp ! EPSILON(1.0_dp)
+!   ! input variables
+!   character(len=*),      intent(in)        :: outpath     ! ouutput path for results
+!   integer(i4), dimension(:,:,:),intent(in) :: SMIc        ! Drought indicator 1 - is under drought
+!   integer(i4),           intent(in)        :: wFlag
+!   integer(i4),           intent(in)        :: yStart
+!   integer(i4),           intent(in)        :: yEnd
+!   integer(i4),           intent(in)        :: nMonths
+!   integer(i4),           intent(in)        :: nCells      
+!   integer(i4),           intent(in)        :: deltaArea   ! Area of 1*1 grid
+!   real(sp),              intent(in)        :: cellsize    ! grid cellsize
+!   integer(i4), optional, intent(in)        :: d
+!   real(dp), parameter                      :: eps = 1.0e-5_dp ! EPSILON(1.0_dp)
 
   
-  ! local variables
-  real(dp)                  :: pDArea
-  !
-  integer(i4)               :: i, j, t, k, y, m, mStart, mEnd
-  character(len=256)        :: FMT
-  character(len=256)        :: fName
+!   ! local variables
+!   real(dp)                  :: pDArea
+!   !
+!   integer(i4)               :: i, j, t, k, y, m, mStart, mEnd
+!   character(len=256)        :: FMT
+!   character(len=256)        :: fName
 
-  select case (wFlag)
-    case (1)
-      ! main statistics
-      fName = trim(outpath) // 'results_ADM.txt'
-      open  (10, file = fName, status='unknown')
-      write (10, 100 ) 'i', 'c_Id', 'mStart', 'mEnd', 'aDD', 'aDA', 'TDM'
-      do i = 1,nClusters
-         ! find starting and ending months of every cluster
-         mStart = 0
-         mEnd = 0
-         do t = 1, nMonths
-            if ( DAreaEvol(t,i) .gt. 0.0_dp) then
-               mEnd = t
-               if (mStart .eq. 0) mStart = t
-            end if
-            if ( ( DAreaEvol(t,i) .lt. eps) .and. (mStart .gt. 0) ) exit 
-         end do
-        write (10,110)  i, shortCnoList(i), mStart, mEnd, aDD(i), aDA(i), TDM(i)
-      end do
-      close (10)
-      !
-      fName = trim(outpath) // 'DArea_evol.txt'
-      open  (11, file = fName, status='unknown')
-      write (FMT, 120) '(a5,', nClusters, '(2x,a2,i7.7))'
-      write (11, FMT ) 'm', ('c_', shortCnoList(i), i=1,nClusters)
-      write (FMT, 130) '(i5,', nClusters, 'e11.5)'
-      do t=1, nMonths
-        write (11,FMT) t, (DAreaEvol(t,i), i=1,nClusters)
-      end  do
-      close (11)
-      !
-      fName = trim(outpath) // 'TDM_evol.txt'
-      open  (12, file = fName, status='unknown')
-      write (FMT, 120) '(a5,', nClusters, '(2x,a2,i7.7))'
-      write (12, FMT ) 'm', ('c_', shortCnoList(i), i=1,nClusters)
-      write (FMT, 130) '(i5,', nClusters, 'e11.5)'
-      do t=1, nMonths
-        write (12,FMT) t, (DTMagEvol(t,i), i=1,nClusters)
-      end  do
-      close (12)
-      !
-      fName = trim(outpath) // 'event_ids.txt'
-      open  (13, file = fName, status='unknown')
-      write (13, 140 ) '<event>', 'c_Id', 'month', 'nCells'
-      ! sorted events in ascending order of areal extend
-      do i=1, nEvents
-        write (13,145) eIdPerm(i), (eventId(eIdPerm(i),j), j=1,3)
-      end  do
-      close (13)
-      !
-      ! NEW STATISTICS
-      ! total drought area evolution (% w.r.t. whole domain)
-      fName = trim(outpath) // 'DArea_evol_total.txt'
-      open  (14, file = fName, status='unknown')
-      write (14, 150 ) 'year', 'month', '%AreaEU'
-      t = 0
-      do y =yStart, yEnd 
-        do m = 1, YearMonths
-          t = t + 1
-          pdArea = real( count( SMIc(:,:,t) == 1 ), dp) / &
-                   real( nCells, dp) * 1e2_dp
-          write(14,160) y, m, pdArea
-        end do
-      end do
-      close (14)
-      !
-      ! Time evolution of the cluster area (less than SMIc) and monthly severity
-      fName = trim(outpath) // 'DcArea_sev_evol.txt'
-      open  (15, file = fName, status='unknown')
-      write (15, 170 ) 'year', 'month', '%cAreaEU','SevDE' 
-      t = 0
-      do y =yStart, yEnd 
-        do m = 1, YearMonths
-          t = t + 1
-          write(15,180) y, m, dASevol(t,1,nBasins+1), dASevol(t,2,nBasins+1)
-        end do
-      end do
-      close (15)
-      !
-    case(2)
-      ! SAD curves for each event and duration
-      do k = 1, nLargerEvents
-         write (fName,200) 'SAD_e_',  eIdPerm( nEvents + 1 - k ) , '_', d, '.txt'
-         fName = trim(outpath) // trim(fName)
-         open (20, file=fName, status='unknown')
-         write (20,210) 'Area[km2]', 'Severity'
-         write (20,220) (( SAD(i, j, k ), j=1,2 ), i=1, nInterArea)
-         close(20)
-      end do
+!   select case (wFlag)
+!     case (1)
+!       ! main statistics
+!       fName = trim(outpath) // 'results_ADM.txt'
+!       open  (10, file = fName, status='unknown')
+!       write (10, 100 ) 'i', 'c_Id', 'mStart', 'mEnd', 'aDD', 'aDA', 'TDM'
+!       do i = 1,nClusters
+!          ! find starting and ending months of every cluster
+!          mStart = 0
+!          mEnd = 0
+!          do t = 1, nMonths
+!             if ( DAreaEvol(t,i) .gt. 0.0_dp) then
+!                mEnd = t
+!                if (mStart .eq. 0) mStart = t
+!             end if
+!             if ( ( DAreaEvol(t,i) .lt. eps) .and. (mStart .gt. 0) ) exit 
+!          end do
+!         write (10,110)  i, shortCnoList(i), mStart, mEnd, aDD(i), aDA(i), TDM(i)
+!       end do
+!       close (10)
+!       !
+!       fName = trim(outpath) // 'DArea_evol.txt'
+!       open  (11, file = fName, status='unknown')
+!       write (FMT, 120) '(a5,', nClusters, '(2x,a2,i7.7))'
+!       write (11, FMT ) 'm', ('c_', shortCnoList(i), i=1,nClusters)
+!       write (FMT, 130) '(i5,', nClusters, 'e11.5)'
+!       do t=1, nMonths
+!         write (11,FMT) t, (DAreaEvol(t,i), i=1,nClusters)
+!       end  do
+!       close (11)
+!       !
+!       fName = trim(outpath) // 'TDM_evol.txt'
+!       open  (12, file = fName, status='unknown')
+!       write (FMT, 120) '(a5,', nClusters, '(2x,a2,i7.7))'
+!       write (12, FMT ) 'm', ('c_', shortCnoList(i), i=1,nClusters)
+!       write (FMT, 130) '(i5,', nClusters, 'e11.5)'
+!       do t=1, nMonths
+!         write (12,FMT) t, (DTMagEvol(t,i), i=1,nClusters)
+!       end  do
+!       close (12)
+!       !
+!       fName = trim(outpath) // 'event_ids.txt'
+!       open  (13, file = fName, status='unknown')
+!       write (13, 140 ) '<event>', 'c_Id', 'month', 'nCells'
+!       ! sorted events in ascending order of areal extend
+!       do i=1, nEvents
+!         write (13,145) eIdPerm(i), (eventId(eIdPerm(i),j), j=1,3)
+!       end  do
+!       close (13)
+!       !
+!       ! NEW STATISTICS
+!       ! total drought area evolution (% w.r.t. whole domain)
+!       fName = trim(outpath) // 'DArea_evol_total.txt'
+!       open  (14, file = fName, status='unknown')
+!       write (14, 150 ) 'year', 'month', '%AreaEU'
+!       t = 0
+!       do y =yStart, yEnd 
+!         do m = 1, YearMonths
+!           t = t + 1
+!           pdArea = real( count( SMIc(:,:,t) == 1 ), dp) / &
+!                    real( nCells, dp) * 1e2_dp
+!           write(14,160) y, m, pdArea
+!         end do
+!       end do
+!       close (14)
+!       !
+!       ! Time evolution of the cluster area (less than SMIc) and monthly severity
+!       fName = trim(outpath) // 'DcArea_sev_evol.txt'
+!       open  (15, file = fName, status='unknown')
+!       write (15, 170 ) 'year', 'month', '%cAreaEU','SevDE' 
+!       t = 0
+!       do y =yStart, yEnd 
+!         do m = 1, YearMonths
+!           t = t + 1
+!           write(15,180) y, m, dASevol(t,1,nBasins+1), dASevol(t,2,nBasins+1)
+!         end do
+!       end do
+!       close (15)
+!       !
+!     case(2)
+!       ! SAD curves for each event and duration
+!       do k = 1, nLargerEvents
+!          write (fName,200) 'SAD_e_',  eIdPerm( nEvents + 1 - k ) , '_', d, '.txt'
+!          fName = trim(outpath) // trim(fName)
+!          open (20, file=fName, status='unknown')
+!          write (20,210) 'Area[km2]', 'Severity'
+!          write (20,220) (( SAD(i, j, k ), j=1,2 ), i=1, nInterArea)
+!          close(20)
+!       end do
 
-      ! SAD percentiles for a given duration
-      write (fName,230) 'SAD_perc_', d, '.txt'
-      fName = trim(outpath) // trim(fName)
-      open (21, file=fName, status='unknown')
-      write (FMT, 240) '(a15,', nQProp, '(9x,a2,f4.2))'
-      write (21,FMT) 'Area[km2]', ('p_', QProp(i), i=1,nQProp)
-      write (FMT, 250) '(f15.0,', nQProp, 'f15.5)'
-      write (21,FMT) ( real(i * deltaArea, dp)*(real(cellsize,dp)**2.0_dp), (SADperc(i,j), j=1,nQProp), i=1, nInterArea)
+!       ! SAD percentiles for a given duration
+!       write (fName,230) 'SAD_perc_', d, '.txt'
+!       fName = trim(outpath) // trim(fName)
+!       open (21, file=fName, status='unknown')
+!       write (FMT, 240) '(a15,', nQProp, '(9x,a2,f4.2))'
+!       write (21,FMT) 'Area[km2]', ('p_', QProp(i), i=1,nQProp)
+!       write (FMT, 250) '(f15.0,', nQProp, 'f15.5)'
+!       write (21,FMT) ( real(i * deltaArea, dp)*(real(cellsize,dp)**2.0_dp), (SADperc(i,j), j=1,nQProp), i=1, nInterArea)
 
-      close (21)
-  end select
+!       close (21)
+!   end select
 
-  100 format (2a15, 2a10, 3a15)
-  110 format (2i15, 2i10, 3f15.5)
-  120 format (a4,i5,a13)
-  130 format (a4,i5,a6)
-  140 format (4a12)
-  145 format (4i12)
-  150 format (2a10,a10)
-  160 format (2i10,f10.3)
-  170 format (2a10,2a10)
-  180 format (2i10,2f10.3)
+!   100 format (2a15, 2a10, 3a15)
+!   110 format (2i15, 2i10, 3f15.5)
+!   120 format (a4,i5,a13)
+!   130 format (a4,i5,a6)
+!   140 format (4a12)
+!   145 format (4i12)
+!   150 format (2a10,a10)
+!   160 format (2i10,f10.3)
+!   170 format (2a10,2a10)
+!   180 format (2i10,2f10.3)
 
-  200 format (a6,i5.5,a,i2.2,a4)
-  210 format (2a15)
-  220 format (f15.0, f15.5)
-  230 format (a9,i5.5,a,i2.2,a4)
-  240 format (a5,i2,a13)
-  250 format (a7,i2,a6)
-end subroutine WriteResultsCluster
+!   200 format (a6,i5.5,a,i2.2,a4)
+!   210 format (2a15)
+!   220 format (f15.0, f15.5)
+!   230 format (a9,i5.5,a,i2.2,a4)
+!   240 format (a5,i2,a13)
+!   250 format (a7,i2,a6)
+! end subroutine WriteResultsCluster
 
   !*************************************************************************
   !    PURPOSE    WRITE netCDF files
