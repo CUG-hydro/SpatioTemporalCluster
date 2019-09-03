@@ -21,13 +21,23 @@ droughtIndicator <- function(mat, mask, SMI_thld){
     
     nrows <- as.integer(dim2[1])
     ncols <- as.integer(dim2[2])
-    nMonths <- as.integer(dim1[2])
+    nMonths <- last(dim1)
     
     cellCoor <- matrix(-9999L, sum(mask), 2)
     SMIc <- array(-9999L, dim = c(nrows, ncols, nMonths))
     
-    mode(mat)  <- "single"
-    mode(mask) <- "logical"
+    if (is.null(mask)) {
+        mask <- matrix(TRUE, nrows, ncols)
+    }
+
+    dim(mat) <- c(nrows*ncols, nMonths)
+    if (!all(mask)){
+        I <- which(mask)
+        mat <- mat[I, ]
+    }
+
+    mode(mat)      <- "single"
+    mode(mask)     <- "logical"
     mode(cellCoor) <- "integer"
     mode(SMIc)     <- "integer"
     

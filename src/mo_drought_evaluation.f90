@@ -35,8 +35,8 @@ subroutine droughtIndicator( SMI, mask, SMI_thld, &
   integer(i4),                                  intent(in) :: ncols
   integer(i4),                                  intent(in) :: nMonths
   
-  real(sp)   , dimension(nrows*ncols, nMonths), intent(in) :: SMI
   logical    , dimension(nrows, ncols),         intent(in) :: mask
+  real(sp)   , dimension(count(mask), nMonths), intent(in) :: SMI
   ! real(sp),    dimension(:,:),                intent(in)  :: SMI              ! this type not work in R
   ! logical,     dimension(:,:),                intent(in)  :: mask
   real(sp)   ,                                  intent(in) :: SMI_thld
@@ -70,6 +70,7 @@ subroutine droughtIndicator( SMI, mask, SMI_thld, &
      dummy_2d_sp = unpack(SMI(:,m), mask, nodata_sp)
      ! filter for possible error within domain
      ! where (SMI(:,:,m) .le. SMI_thld .and. SMI(:,:,m) .ne. nodata_sp )
+     
      where ( (lesserequal(dummy_2d_sp, SMI_thld)) .and. (notequal(dummy_2d_sp, nodata_sp)) )
         SMIc(:,:,m) = 1
      elsewhere ( notequal(dummy_2d_sp, nodata_sp) )
@@ -315,6 +316,12 @@ subroutine ClusterStats( SMI, mask, nrows, ncols, nMonths, nCells, SMI_thld, mGr
 
         ! total magnitude (NEW  SM_tr -SMI) !!!
         dummy_2d_sp = unpack(SMI(:,t), mask, nodata_sp)
+
+        ! if (t >= 10) then
+        !   print *, dummy_2d_sp(:,:)
+        !   print *, SMI_thld - dummy_2d_sp(:,:)
+        ! end
+        
         DTMagEvol(t,ic) = sum( (SMI_thld - dummy_2d_sp), mask = idCluster(:,:,t) == shortCnoList(ic) )
      end do
 

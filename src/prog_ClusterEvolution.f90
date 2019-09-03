@@ -50,9 +50,10 @@ subroutine ClusterStats2( SMI, mask, SMI_thld, &
 
     ! input variables
     ! integer(i4), dimension(:,:,:),            intent(inout) :: SMIc     ! Drought indicator
-    real(sp)   , dimension(nrows*ncols, nMonths), intent(in)    :: SMI
-    logical    , dimension(nrows, ncols),         intent(in)    :: mask
-    real(sp)   ,                                  intent(in)    :: SMI_thld
+    ! real(sp)   , dimension(nrows*ncols, nMonths), intent(in) :: SMI
+    logical    , dimension(nrows, ncols),         intent(in) :: mask
+    real(sp)   , dimension(count(mask), nMonths), intent(in) :: SMI
+    real(sp)   ,                                  intent(in) :: SMI_thld
 
     integer(i4),                              intent(in)    :: nrows
     integer(i4),                              intent(in)    :: ncols

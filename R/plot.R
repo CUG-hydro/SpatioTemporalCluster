@@ -1,6 +1,6 @@
 #' Plot drought cluster result
 #' 
-#' @param r2 obj returned by [ClusterEvolution()]
+#' @param idClusters obj returned by [ClusterEvolution()]
 #' @param x numeric vector, latitudes
 #' @param y numeric vector, longitudes
 #' 
@@ -9,8 +9,8 @@
 #' @import lattice
 #' 
 #' @export plot.cluster
-plot.cluster <- function(r2, x = NULL, y = NULL){
-    dim   <- dim(r2)
+plot.cluster <- function(idClusters, x = NULL, y = NULL){
+    dim   <- dim(idClusters)
     nrow  <- dim[1]
     ncol  <- dim[2]
     ntime <- dim[3]
@@ -19,7 +19,9 @@ plot.cluster <- function(r2, x = NULL, y = NULL){
     if (is.null(y)) y <- 1:ncol
     grid <- expand.grid(x=x, y=y)
     
-    mat <- r2
+    mat <- idClusters
+    mat[mat == -9999L] = NA_integer_
+    
     dim(mat) <- c(nrow*ncol, ntime)
     df <- melt(cbind(grid, mat), c("x", "y"), variable.name = "time")
     

@@ -13,18 +13,26 @@ ClusterStats <- function(mat, mask, SMI_thld,
     
     nrows   <- dim2[1]
     ncols   <- dim2[2]
-    nMonths <- dim1[2]
+    nMonths <- last(dim1)
     nCells  <- sum(mask)
     cellCoor <- matrix(-9999L, nCells, 2)
 
-    SMIc <- array(-9999L, dim = c(nrows, ncols, nMonths))
+    if (is.null(mask)) {
+        mask <- matrix(TRUE, nrows, ncols)
+    }
+
+    dim(mat) <- c(nrows*ncols, nMonths)
+    if (!all(mask)){
+        I <- which(mask)
+        mat <- mat[I, ]
+    }
     
     mode(mat)          <- "single"
     mode(mask)         <- "logical"
     mode(mGridArea)    <- "single"
 
+    # SMIc <- array(-9999L, dim = c(nrows, ncols, nMonths))
     nClusters  = length(shortCnoList)
-
     DAreaEvol2 = array(-9999, dim = c(nMonths, nClusters))
     DTMagEvol2 = array(-9999, dim = c(nMonths, nClusters))
 
