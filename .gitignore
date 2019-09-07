@@ -15,3 +15,6 @@ src/mo_weight
 fort.6
 
 *.ipynb
+output/
+src-i386/
+src-x64/

@@ -1,12 +1,11 @@
-Package: SMI
+Package: heatwave
 Type: Package
-Title: SMI
+Title: heatwave
 Version: 1.0
 Date: 2019-08-29
 Authors@R: person("Dongdong", "Kong", email = "kongdd.sysu@gmail.com",
   role = c("aut", "cre"))
-Description: One paragraph description of what the package does as one
-        or more full sentences.
+Description: Heatwaves in spatial.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports: Rcpp (>= 1.0.2), 

@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-# SMI
+# heatwave
 
 <!-- badges: start -->
 [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/kongdd/smi?branch=master&svg=true)](https://ci.appveyor.com/project/kongdd/smi)
@@ -27,7 +27,7 @@ The goal of SMI is to ...
 You can install the released version of SMI from [CRAN](https://CRAN.R-project.org) with:
 
 ``` r
-install.packages("SMI")
+install.packages("heatwave")
 ```
 
 ## Example
@@ -35,7 +35,7 @@ install.packages("SMI")
 This is a basic example which shows you how to solve a common problem:
 
 ```{r example}
-library(SMI)
+library(heatwave)
 ## basic example code
 ```
 
