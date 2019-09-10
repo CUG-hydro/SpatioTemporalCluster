@@ -56,15 +56,11 @@ lst <- foreach(files = lst_files, var = names(lst_files)) %do% {
     # ncwrite_cmip5(list(Tmin = arr), "Tmin.nc", "degC", range = range)
 }
 
-library(Rcmip5)
-library(purrr)
-library(stars)
 files_nc <- dir("e:/SciData/China_daily_temp/", full.names = TRUE) %>% 
     set_names(c("Tmax", "Tmean", "Tmin"))
 # files_nc <- dir("/mnt/e/SciData/China_daily_temp/", full.names = TRUE)
 file <- files_nc[1]
-
-lst <- map(files_nc, read_stars)
+lst  <- map(files_nc, read_stars)
 
 # {
     # devtools::load_all("../Rcmip5")

@@ -5,10 +5,10 @@
 \title{Calculate drought status}
 \usage{
 ClusterStats(mat, mask, SMI_thld, idCluster, shortCnoList,
-  mGridArea = NULL)
+  exceeding = TRUE, mGridArea = NULL, masked = FALSE)
 }
 \arguments{
-\item{mat}{double matrix, with the dim of \code{[ngrid, nmonth]}, (\code{ngrid = nrow*ncol}).
+\item{mat}{double matrix, with the dim of \code{[ngrid, nmonth]}, (\code{nmask = nrow*ncol}).
 SMI drought index.}
 
 \item{mask}{logical matrix, \code{[nrow, ncol]}.}
@@ -19,8 +19,40 @@ SMI drought index.}
 
 \item{shortCnoList}{vector, cluster num_id}
 
+\item{exceeding}{Boolean. How to define a event? Exceed the threshold or less than?
+For examples, for heatwaves, \code{exceeding} should be true; for drought, cold waves
+\code{exceeding} should be false.}
+
 \item{mGridArea}{matrix of grid area}
+
+\item{masked}{If true, mat will be a 2d matrix, with the dimension of \code{[nCells, ngrid]}.
+If not, 3d mat will be masked by \code{mask} and transfer to 2d matrix.}
 }
 \description{
 Calculate drought status
+}
+\examples{
+# devtools::load_all()
+library(SMI)
+
+set.seed(1)
+
+nrow <- 10
+ncol <- 10
+ngrid <- nrow*ncol
+ntime <- 12
+
+mat <- matrix(rnorm(nrow*ncol*ntime), ngrid, ntime)
+mask <- matrix(mat[,1], nrow, ncol) > 0.5
+SMI_thld <- 0.2
+
+r  <- droughtIndicator( mat, mask, SMI_thld)    
+r_cluster <- ClusterEvolution(r$SMIc, r$cellCoor)
+r_status  <- ClusterStats(mat, mask, SMI_thld, r_cluster$idCluster, r_cluster$shortCnoList)
+
+## 2. visualization ------------------------------------------------------------
+# devtools::install_github("kongdd/Ipaper")
+# p <- plot.cluster(r2)
+# ratio = 0.8
+# Ipaper::write_fig(p, "a.pdf", 12*ratio, 8*ratio)
 }

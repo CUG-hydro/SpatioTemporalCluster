@@ -22,11 +22,11 @@ CONTAINS
 !                  updated  05.10.2011
 !*********************************************************************
 subroutine droughtIndicator( SMI, mask, SMI_thld, &
-  nrows, ncols, nMonths, &
+  nrows, ncols, nMonths, exceeding, &
   cellCoor, SMIc) bind(C, name="droughtindicator_")
 
   use mo_smi_constants, only : nodata_sp, nodata_i4
-  use mo_utils,         only : lesserequal, notequal
+  use mo_utils,         only : lesserequal, notequal, greaterequal
 
   implicit none
 
@@ -39,11 +39,12 @@ subroutine droughtIndicator( SMI, mask, SMI_thld, &
   real(sp)   , dimension(count(mask), nMonths), intent(in) :: SMI
   ! real(sp),    dimension(:,:),                intent(in)  :: SMI              ! this type not work in R
   ! logical,     dimension(:,:),                intent(in)  :: mask
-  real(sp)   ,                                  intent(in) :: SMI_thld
+  ! real(sp)   ,                                  intent(in) :: SMI_thld
+  real(sp)   , dimension(nrows, ncols),         intent(in) :: SMI_thld
+  logical    ,                                  intent(in) :: exceeding 
 
   integer(i4), dimension(count(mask), 2),        intent(out) :: cellCoor
   integer(i4), dimension(nrows, ncols, nMonths), intent(out) :: SMIc
-  
   ! integer(i4), dimension(:,:), allocatable,   intent(out) :: cellCoor
   ! integer(i4), dimension(:,:,:), allocatable, intent(out) :: SMIc       ! Drought indicator
   ! integer(i4), dimension(count(mask), 2),   intent(out) :: cellCoor
@@ -71,21 +72,42 @@ subroutine droughtIndicator( SMI, mask, SMI_thld, &
   ! write (*, *) "========================"
   ! write (*, "(10L6)") mask
 
-  do m = 1, nMonths
-     dummy_2d_sp = unpack(SMI(:,m), mask, nodata_sp)
-     ! filter for possible error within domain
-     ! where (SMI(:,:,m) .le. SMI_thld .and. SMI(:,:,m) .ne. nodata_sp )
-     ! write (*, *) "========================"
-     ! write (*, "(10F9.2)") dummy_2d_sp
-     where ( (lesserequal(dummy_2d_sp, SMI_thld)) .and. (notequal(dummy_2d_sp, nodata_sp)) )
-        SMIc(:,:,m) = 1
-     elsewhere ( notequal(dummy_2d_sp, nodata_sp) )
-        SMIc(:,:,m) = 0
-     elsewhere
-        SMIc(:,:,m) = nodata_i4
-     end where
-  end do
+  ! write (*, "(10F9.2)") SMI_thld
 
+  if (exceeding) then
+    do m = 1, nMonths
+      dummy_2d_sp = unpack(SMI(:,m), mask, nodata_sp)
+      ! filter for possible error within domain
+      ! where (SMI(:,:,m) .le. SMI_thld .and. SMI(:,:,m) .ne. nodata_sp )
+      ! write (*, *) "========================"
+      ! write (*, "(10F9.2)") dummy_2d_sp
+      ! write (*, "(10F9.2)") greaterequal(dummy_2d_sp, SMI_thld) 
+      where ( (dummy_2d_sp >= SMI_thld) .and. (notequal(dummy_2d_sp, nodata_sp)) )
+        SMIc(:,:,m) = 1
+      elsewhere ( notequal(dummy_2d_sp, nodata_sp) )
+        SMIc(:,:,m) = 0
+      elsewhere
+        SMIc(:,:,m) = nodata_i4
+      end where
+    end do
+  else
+    ! if not exceeding (less, e.g. drought)
+    do m = 1, nMonths
+      dummy_2d_sp = unpack(SMI(:,m), mask, nodata_sp)
+      ! filter for possible error within domain
+      ! where (SMI(:,:,m) .le. SMI_thld .and. SMI(:,:,m) .ne. nodata_sp )
+      ! write (*, *) "========================"
+      ! write (*, "(10F9.2)") dummy_2d_sp
+      where ( ( dummy_2d_sp <= SMI_thld) .and. (notequal(dummy_2d_sp, nodata_sp)) )
+        SMIc(:,:,m) = 1
+      elsewhere ( notequal(dummy_2d_sp, nodata_sp) )
+        SMIc(:,:,m) = 0
+      elsewhere
+        SMIc(:,:,m) = nodata_i4
+      end where
+    end do
+  end if 
+  
   k = 0
   do j=1,ncols
      do i=1,nrows
@@ -127,6 +149,7 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
   ! integer(i4), dimension(:,:), allocatable, intent(in)    :: cellCoor
   integer(i4),                              intent(in)    :: nCellInter ! number cells for joining clusters in time
   integer(i4),                              intent(in)    :: thCellClus ! treshold  for cluster formation in space
+  ! logical    ,                              intent(in)    :: exceeding 
   ! integer(i4), dimension(nrows,ncols,nMonths),intent(out) :: idCluster2 ! drought clusters id, returned for R
   integer(i4), dimension(nrows,ncols,nMonths),intent(out) :: idCluster ! drought clusters id, returned for R
   integer(i4),                                intent(out) :: nClusters
@@ -270,8 +293,11 @@ subroutine ClusterStats( SMI, mask, nrows, ncols, nMonths, nCells, SMI_thld, mGr
   integer(i4),                 intent(in) :: nMonths
   integer(i4),                 intent(in) :: nCells      ! number of effective cell
   ! integer(i4), dimension(:,:), intent(in) :: Basin_Id    ! IDs for basinwise drought analysiss
-  real(sp),                    intent(in) :: SMI_thld    ! SMI threshold for clustering
+  ! real(sp),                    intent(in) :: SMI_thld    ! SMI threshold for clustering
+  real(sp), dimension(nrows, ncols),   intent(in) :: SMI_thld
+
   real(sp), optional,dimension(:, :),  intent(in) :: mGridArea
+  ! logical    ,                                intent(in)  :: exceeding 
   integer(i4), dimension(nrows,ncols,nMonths),intent(in)  :: idCluster  ! drought clusters id, returned for R
   integer(i4),                                intent(in)  :: nClusters
   integer(i4), dimension(nClusters),          intent(in)  :: shortCnoList

@@ -4,16 +4,21 @@
 \alias{plot.cluster}
 \title{Plot drought cluster result}
 \usage{
-\method{plot}{cluster}(idClusters, x = NULL, y = NULL, ...)
+plot.cluster(idClusters, times = 1:4, range = NULL,
+  origin = "1961-01-01", ..., sp.layout = NULL)
 }
 \arguments{
 \item{idClusters}{obj returned by \code{\link[=ClusterEvolution]{ClusterEvolution()}}}
 
+\item{times}{integer vector, which time to plot?}
+
+\item{range}{2 numeric vector}
+
+\item{...}{other parameters to \code{\link[lattice:levelplot]{lattice::levelplot()}}}
+
 \item{x}{numeric vector, latitudes}
 
 \item{y}{numeric vector, longitudes}
-
-\item{...}{other parameters to \code{\link[lattice:levelplot]{lattice::levelplot()}}}
 }
 \description{
 Plot drought cluster result

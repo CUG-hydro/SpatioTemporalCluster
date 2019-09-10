@@ -4,15 +4,22 @@
 \alias{droughtIndicator}
 \title{droughtIndicator}
 \usage{
-droughtIndicator(mat, mask, SMI_thld)
+droughtIndicator(mat, mask, SMI_thld, exceeding = TRUE, masked = FALSE)
 }
 \arguments{
-\item{mat}{double matrix, with the dim of \code{[ngrid, nmonth]}, (\code{ngrid = nrow*ncol}).
+\item{mat}{double matrix, with the dim of \code{[ngrid, nmonth]}, (\code{nmask = nrow*ncol}).
 SMI drought index.}
 
 \item{mask}{logical matrix, \code{[nrow, ncol]}.}
 
 \item{SMI_thld}{double number,}
+
+\item{exceeding}{Boolean. How to define a event? Exceed the threshold or less than?
+For examples, for heatwaves, \code{exceeding} should be true; for drought, cold waves
+\code{exceeding} should be false.}
+
+\item{masked}{If true, mat will be a 2d matrix, with the dimension of \code{[nCells, ngrid]}.
+If not, 3d mat will be masked by \code{mask} and transfer to 2d matrix.}
 }
 \value{
 \itemize{

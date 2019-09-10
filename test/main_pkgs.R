@@ -38,9 +38,16 @@ suppressMessages({
     library(Rcmip5)
     library(missInfo)
     library(ECOF)
+
+    library(purrr)
+    library(stars)
     # devtools::install_github("peleonard/RcppMovStat")
 })
 
+
+cellsize <- 0.5
+range    <- c(72, 136, 18, 54)
+range_nc <- c(70, 140, 15, 55)
 
 flipud <- function(x){
     x %>% .[, ncol(.):1]
@@ -50,17 +57,4 @@ flipud <- function(x){
 file.move <- function(file, target){
     file_new <- paste0(target, "/", basename(file))
     file.rename(file, file_new)
-}
-
-show_miss <- function(info){
-    # , var = info$variable
-    temp <- foreach(str = info$str_miss) %do% {
-        # fprintf(glue("{var} --------------\n\n"))
-        str_new <- str %>% gsub(", ", "\n", .)
-        cat(str_new)
-        NULL
-    }
-    # browser()
-    # cat(temp)
-    invisible()
 }

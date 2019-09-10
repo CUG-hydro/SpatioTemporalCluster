@@ -1,11 +1,6 @@
 # source("test/main_gaps.R")
 library(stars)
 
-
-cellsize <- 0.5
-range_nc <- c(70, 140, 15, 55)
-range    <- c(72, 136, 18, 54)
-
 ilon <- match(seq(72+cellsize/2, 136, cellsize), seq(70+cellsize/2, 140, cellsize))
 ilat <- match(seq(18+cellsize/2, 54, cellsize) , seq(15+cellsize/2, 55, cellsize))
 
@@ -46,6 +41,18 @@ get_miss <- function(files, dates_all){
     d_miss
 }
 
+show_miss <- function(info){
+    # , var = info$variable
+    temp <- foreach(str = info$str_miss) %do% {
+        # fprintf(glue("{var} --------------\n\n"))
+        str_new <- str %>% gsub(", ", "\n", .)
+        cat(str_new)
+        NULL
+    }
+    # browser()
+    # cat(temp)
+    invisible()
+}
 
 # fill missing val by other dataset
 fill_miss <- function(d_miss, indir_3h) {

@@ -10,6 +10,8 @@
 #' @author
 #' Budapest, 10-11.03.2011
 #' 
+#' @example man/example/ex-droughtIndictor.R
+#' 
 #' @import magrittr
 #' @export
 ClusterEvolution <- function(SMIc, cellCoor, thCellClus = 1L, nCellInter = 1L){
