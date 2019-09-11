@@ -13,7 +13,9 @@ Imports: Rcpp (>= 1.0.2),
     reshape2,
     lattice,
     scales, 
-    magrittr
+    magrittr, 
+    sp, 
+    matrixStats
 LinkingTo: Rcpp
 Suggests: 
     testthat (>= 2.1.0),

@@ -6,15 +6,23 @@ src/CMakeFiles/
 *.o
 *.so
 *.dll
+fort.6
 
 *.mod
 github/
 src/netcdff/
 src/mo_weight
+
 *.pdf
-fort.6
+*.svg
+
+*.md
+*.Rmd
 
 *.ipynb
 output/
 src-i386/
 src-x64/
+
+# data
+*.rda

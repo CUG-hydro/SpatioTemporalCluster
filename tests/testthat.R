@@ -1,4 +1,4 @@
 library(testthat)
-library(SMI)
+library(heatwave)
 
-test_check("SMI")
+test_check("heatwave")

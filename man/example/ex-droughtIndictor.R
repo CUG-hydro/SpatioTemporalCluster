@@ -1,5 +1,5 @@
 # devtools::load_all()
-library(SMI)
+library(heatwave)
 
 set.seed(1)
 

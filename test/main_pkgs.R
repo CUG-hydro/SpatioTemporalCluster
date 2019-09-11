@@ -1,6 +1,5 @@
 # source('test/main_pkgs.R', encoding = "utf-8")
 suppressMessages({
-    library(ncdf4)
     library(magrittr)
     library(dplyr)
     library(plyr)
@@ -16,6 +15,10 @@ suppressMessages({
     library(doParallel)
     
     library(sp)
+    library(raster)
+    library(ncdf4)
+    library(matrixStats)
+    
     library(lattice)
     library(latticeExtra)
     library(grid)
@@ -26,7 +29,6 @@ suppressMessages({
     
     library(tidyverse)
     library(pracma)
-    library(matrixStats)
     library(rlang)
     library(glue)
     # library(drake)
@@ -45,6 +47,8 @@ suppressMessages({
 })
 
 
+source("../Rcmip5/R/colors.R")
+
 cellsize <- 0.5
 range    <- c(72, 136, 18, 54)
 range_nc <- c(70, 140, 15, 55)
@@ -57,4 +61,16 @@ flipud <- function(x){
 file.move <- function(file, target){
     file_new <- paste0(target, "/", basename(file))
     file.rename(file, file_new)
+}
+
+
+#' @param path file path of windows system
+dir2 <- function(path, pattern = NULL, all.files = FALSE, 
+    full.names = FALSE, recursive = FALSE, ...) 
+{
+    if (.Platform$OS.type == "unix") {
+        # unix
+        path %<>% paste0("/mnt/", .) %>% gsub(":", "", .)    
+    }
+    dir(path, pattern, all.files, full.names, recursive, ...)
 }

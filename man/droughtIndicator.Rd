@@ -32,7 +32,7 @@ Return a drought status array with 0 (non-drought), 1 (drought), -9999 (NA).
 }
 \examples{
 # devtools::load_all()
-library(SMI)
+library(heatwave)
 
 set.seed(1)
 

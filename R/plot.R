@@ -23,7 +23,7 @@ plot.cluster <- function(idClusters, times = 1:4, range = NULL, origin = "1961-0
     if (is.null(times)) {
         times <- 1:ntime
     } else if (class(times) == "date") {
-        times <- difftime(times, origin, units = "days") %>% as.numeric() %>% subtract(1)
+        times <- difftime(times, origin, units = "days") %>% as.numeric() %>% add(1)
     }
 
     if (is.null(range)) {
@@ -46,10 +46,10 @@ plot.cluster <- function(idClusters, times = 1:4, range = NULL, origin = "1961-0
     grid <- expand.grid(x=x, y=y)
     
     times <- times[times <= ntime]
-    mat <- idClusters[,,times]
+    mat   <- idClusters[,,times]
 
     origin <- as.Date(origin)
-    date   <- seq(origin-1, origin + length(times) - 1, by = "day")
+    date   <- seq(origin, origin + length(times) - 1, by = "day")
 
     mat[mat == -9999L] = NA_integer_
     
@@ -101,9 +101,9 @@ plot.cluster <- function(idClusters, times = 1:4, range = NULL, origin = "1961-0
                 
                 I <- subscripts[which(!is.na(z[subscripts]))]
                 d_lab <- data.table(x = x[I], y = y[I], labels = z[I])
-                # d_lab <- d_lab[, .(x = mid(x), y = mid(y)), labels]
-                # labels <- as.character(z[subscripts])
-                # panel.text(d_lab$x, d_lab$y, labels = d_lab$labels, ..., cex = 0.5)
+                d_lab <- d_lab[, .(x = mid(x), y = mid(y)), labels]
+                labels <- as.character(z[subscripts])
+                panel.text(d_lab$x, d_lab$y, labels = d_lab$labels, ..., cex = 0.5)
                 sppanel(list(sp.layout), panel.number(), first = FALSE)
             })
     p

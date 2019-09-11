@@ -4,109 +4,124 @@ grid <- get_grid(range, cellsize = 0.5)
 mGridArea <- raster(grid) %>% area() %>% {.@data@values}
 # mGridArea
 
-duration <- function(x){
-    # I <- which(x != 0)
-    I <- which.notna(x)
-    start <- I[1]
-    end <- I[length(I)]
-    duration <- end -  start + 1
-    listk(start, end, duration)
-}
-
-HW_characteristics <- function(r_cluster, r_status, origin = "1961-01-01"){
-    info <- r_cluster$shortCnoList %>% data.table(id = ., date = as.Date(floor(./100) - 1, origin))
-
-    x <- r_status$DAreaEvol
-    x[x == 0] <- NA
-
-    area_avg <- colMeans2(x, na.rm = TRUE)# %>% plot()
-    area_sum <- colSums2(x, na.rm = TRUE)# %>% plot()
-
-    res <- alply(x, 2, duration)
-    info_time <- purrr::transpose(res) %>% map(unlist) 
-    info_time[1:2] %<>% map(~as.Date(., as.Date(origin) - 1))
-    info_time %<>% as.data.table()
-
-    df <- cbind(info, area_avg, area_sum, info_time)
-    df
-}
-
 dates <- seq.Date(ymd('1961-01-01'), ymd('2019-08-31'), by = "day")
 years <- year(dates)
 
 # ------------------------------------------------------------------------------
-files_nc <- dir("e:/SciData/China_daily_temp/", full.names = TRUE) %>% 
-    set_names(c("Tmax", "Tmean", "Tmin"))
-# files_nc <- dir("/mnt/e/SciData/China_daily_temp/", full.names = TRUE)
+
+indir <- "e:/SciData/China_daily_temp/"
+files_nc <- dir2(indir, full.names = TRUE) %>% set_names(c("Tmax", "Tmean", "Tmin"))
+# files_nc <- dir(indir, full.names = TRUE)
 
 # file <- files_nc[1]
 # lst  <- map(files_nc[1], read_stars)
-
 
 ## 1. 测试干旱面积 -------------------------------------------------------------
 file <- files_nc[1]
 r <- ncread_cmip5(file, convertTo2d = FALSE)
 
-arr  <- r$data
-mask <- !is.na(arr[,,1])
+arr    <- r$data
+mask   <- !is.na(arr[,,1])
 I_grid <- which.notna(mask)
 
-mat  <- array_3dTo2d(arr, I_grid = which(mask))
+# mat  <- array_3dTo2d(arr, I_grid = which(mask))
+
+# Tmax <- colMeans2(mat, na.rm = TRUE) #%>% plot()
+# data.table(temp = Tmax, year = years)[, mean(temp), .(year)] %>% plot(V1~year, .)
 
 ## 采取其中一年的数据做测试 
 
-
 # 1. get threshold -------------------------------------------------------------
-TRS  <- apply_3d(arr, 3, rowQuantiles, probs = 0.99) # 相当于 3 times/year
 # TRS2 <- apply_3d(arr_year, 3, rowQuantiles, probs = 0.99) # 相当于 3 times/year
 
-lst <- foreach(year = 1961:2019 %>% set_names(., .), i = icount()) %do% {
-    runningId(year)
-    
-    I_year   <- which(years == year)
-    arr_year <- arr[,, I_year]
+## 1. 敏感性分析
+nCellInters = 4^c(1.5, 2, 2.5, 3, 3.5) %>% set_names(., .)
+probs = c(0.95, 0.99, 0.995) %>% set_names(., .)
 
-    mat  <- array_3dTo2d(arr_year, I_grid = which(mask))
+InitCluster(8)
 
-    # 添加中国底图
-    r <- droughtIndicator( mat, mask, SMI_thld = TRS, masked = TRUE)
-    r_cluster <- ClusterEvolution(r$SMIc, r$cellCoor, thCellClus = 16, nCellInter = 8)
-    r_status  <- ClusterStats(mat, mask, SMI_thld, r_cluster$idCluster, r_cluster$shortCnoList, 
-        mGridArea = mGridArea, masked = TRUE)
-    
-    origin <- glue("{year}-01-01")
-    d <- HW_characteristics(r_cluster, r_status, origin = origin)
+d_param <- expand.grid(prob = probs, nCellInter = nCellInters)
+
+lst <- foreach(prob = d_param$prob, nCellInter = d_param$nCellInter) %dopar% {
+    df <- HW_cluster(arr, mGridArea, prob, nCellInter)
 }
 
-df <- melt_list(lst, "year")
-df$year %<>% as.integer()
+dim(lst)      <- c(length(probs), length(nCellInters))
+dimnames(lst) <- list(probs, nCellInters)
 
+df <- map(seq_along(nCellInters) %>% set_names(nCellInters), 
+    ~lst[, .x] %>% set_names(probs) %>% melt_list("prob")) %>% melt_list("nCellInter")
+file_sensitive <- "cluster_sensitity.rda"
+
+df$nCellInter %<>% factor(nCellInters, sprintf("nCellInter = %s", nCellInters))
+
+save(df, lst, file = file_sensitive)
+# ------------------------------------------------------------------------------
+
+check_temp_dist = FALSE
+if (check_temp_dist) {
+    # check temp spatial dist
+    brks   <- c(-Inf, seq(15, 30, 3), 33, seq(35, 40), Inf)
+    ncolor <- length(brks) - 1
+    cols   <- colorRampPalette(.colors$Tavg)(ncolor*4)
+    
+    nrow   <- nrow(arr_year)
+    ncol   <- ncol(arr_year)
+    
+    dates  <- seq(make_date(year, 1, 1), (make_date(year+1,1,1)-1), "day")
+    I_sel  <- c("2010-06-01", "2010-09-30") %>% ymd() %>% yday() %>% {seq(.[1], .[2])}
+    
+    yaxis  <- list(at = pretty(1:ncol))
+    xaxis  <- list(at = pretty(1:nrow))
+    
+    p_temp <- levelplot(arr_year[,,I_sel], col.regions = cols, 
+                        at = brks, 
+                        strip=strip.custom(factor.levels=format(dates[I_sel])), 
+                        scale = list(x = xaxis, y = yaxis),
+                        as.table = TRUE,
+                        xlab = NULL, ylab = NULL)
+    write_fig(p_temp, "2010 temp.pdf", 16, 16)
+}
+
+
+fig.no <- 2
+prefix <- "[TRS=quantile]"
+
+# 1.1 duration
 {
-    d <- df[order(-duration)][duration > 10]
-    p <- ggplot(d, aes(duration, area_avg, color = year)) + 
-        geom_point() + 
-        geom_text_repel(data = d[duration > 20 | area_avg > 300], aes(label = year))
-    p
+    # df <- melt_list(lst, "year")
+    d_dur <- df[duration >= 3, .(year, duration, nCellInter, prob, 
+        grp = factor((year >= 1991)*1, labels = c("before 1990", "after 1991")))]
+
+    ylab = expression("Average affect area of each HW event (10"^3 * " " * km^2 * ")")
+    p1 <- ggplot(d_dur, aes(duration, color = grp, fill = grp)) + geom_histogram() + 
+        labs(x = "Duration (days)", y = ylab) 
+        
+    # ALL HW events
+    # d  <- df[order(-duration)][duration > 10]
+    # p1 <- ggplot(d, aes(duration, area_mean, color = year)) + 
+    #     geom_point()
+    #     geom_text_repel(data = d[duration > 20 | area_mean > 800], aes(label = year)) + 
+       
+    outfile <- glue("Figure{fig.no}.1 {prefix} HW duration frequency.svg")
+    write_fig(p1, outfile, 10, 4.5)
     # ggplotly(p)
 }
 
-d <- df[, .(area = sum(area_sum)), .(year)][, smooth := movmean(area, halfwin = 2)]
-d
-    ggplot(d, aes(year, area)) + geom_point() + 
-    geom_line(aes(year, smooth), size = 0.4) + 
-    geom_text_repel(data = d[area > 2.5e4], aes(label = year))
+# d <- df[, .(area = sum(area_sum)), .(year)][, smooth := ]
+# ggplot(d, aes(year, area)) + geom_point() + 
+#     geom_line(aes(year, smooth), size = 0.4) + 
+#     geom_text_repel(data = d[area > 5e7], aes(label = year)) + 
+#     labs(y = ylab)
+# 
+# df %>% {hist(.$area_mean, breaks = 30)}
+#     
 
-df %>% {hist(.$area_avg, breaks = 30)}
-    
-p <- plot.cluster(r_cluster$idCluster, times = NULL, range = range, sp.layout = sp_arc_CH)
-write_fig(p, "a.pdf", 16, 16)
-
-
-## 2. HW characteristics -------------------------------------------------------
-
-df[order(-area_sum), ][1:20, ]
-df[order(-area_avg), ][1:20, ]
-
+# ## 2. HW characteristics -------------------------------------------------------
+# 
+# df[order(-area_sum), ][1:20, ]
+# df[order(-area_mean), ][1:20, ]
+# 
 
 ## 2. 干旱指标
 # .nchunk <- 8

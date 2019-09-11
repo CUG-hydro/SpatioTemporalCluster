@@ -20,7 +20,7 @@ cluster drought clusters in space and time
 }
 \examples{
 # devtools::load_all()
-library(SMI)
+library(heatwave)
 
 set.seed(1)
 
