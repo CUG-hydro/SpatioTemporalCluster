@@ -309,7 +309,7 @@ subroutine ClusterStats( SMI, mask, nrows, ncols, nMonths, nCells, SMI_thld, mGr
   integer(i4)                                               :: t
   integer(i4) , dimension(:), allocatable                   :: counterA
   integer(i4) , dimension(:,:), allocatable                 :: aDDG
-  real(dp) , dimension(:,:), allocatable                    :: mSev
+  real(dp)    , dimension(:,:), allocatable                 :: mSev
 
   integer(i4)                                               :: eCounter
 

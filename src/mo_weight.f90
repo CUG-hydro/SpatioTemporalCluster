@@ -14,26 +14,32 @@ END INTERFACE wmean
 
 contains
 
-real function wsum_vec(mat, ws, mask)
+! normalize: default false; if true, sum(ws) = 1
+real function wsum_vec(mat, ws, mask, normalize)
     REAL   , dimension(:), intent(in) :: mat
     REAL   , dimension(:), optional, intent(in) :: ws
     LOGICAL, dimension(:), optional, intent(in) :: mask
+    LOGICAL,               optional, intent(in) :: normalize
 
     ! implicit none
     ! real :: args
     ! local
     REAL   , dimension(:), allocatable :: vec
+    REAL   , dimension(:), allocatable :: ws2
     REAL   , dimension(:), allocatable :: w
     integer :: nrow, ncol, i, j
     real    :: tol
-    LOGICAL :: is_weight 
+    LOGICAL :: is_weight
+
     is_weight = present(ws)
+    if (is_weight) ws2 = ws
     ! can't use print here
 
     if ( .not. present(mask) ) then
         ! no mask
         if (is_weight) then
-            tol = sum(mat * (ws / sum(ws))) * size(ws)
+            if (present(normalize) .and. normalize) ws2 = ws / sum(ws) * size(ws)
+            tol = sum(mat * ws2)
         else
             tol = sum(mat)
         endif
@@ -41,11 +47,13 @@ real function wsum_vec(mat, ws, mask)
         vec = PACK(mat, mask)
 
         if (is_weight) then
-            w   = PACK(ws, mask)
+            w   = PACK(ws2, mask)
+            if (present(normalize) .and. normalize) w = w / sum(w) * size(w)
+
             ! allocate( w(count(mask)) )
-            tol = sum(vec * (w / sum(w))) * size(w, 1)
+            tol = sum(vec * w)
             deallocate(w)
-        else 
+        else
             tol = sum(vec)
         endif
         deallocate(vec)
@@ -54,38 +62,46 @@ real function wsum_vec(mat, ws, mask)
     wsum_vec = tol
 end function wsum_vec
 
-real function wsum_mat(mat, ws, mask)
+real function wsum_mat(mat, ws, mask, normalize)
     ! implicit none
     ! real :: args
     REAL   , dimension(:, :), intent(in) :: mat
     REAL   , dimension(:, :), optional, intent(in) :: ws
     LOGICAL, dimension(:, :), optional, intent(in) :: mask
-
+    LOGICAL,                  optional, intent(in) :: normalize
+    
     ! local
-    REAL   , dimension(:), allocatable :: vec
-    REAL   , dimension(:), allocatable :: w
+    REAL   , dimension(:, :), allocatable :: ws2
+    REAL   , dimension(:)   , allocatable :: vec
+    REAL   , dimension(:)   , allocatable :: w
     
     integer :: nrow, ncol, i, j
     real    :: tol
-    
     LOGICAL :: is_weight 
-    is_weight = present(ws)
 
+    is_weight = present(ws)
+    if (is_weight) ws2 = ws
+    ! write (*, *) ws2 !size(ws2, 1), size(ws2, 2)
+    
     if (.not. present(mask)) then
         if (is_weight) then
-            tol = sum(mat * (ws / sum(ws))) * size(ws)
+            ! if normalize, sum(w_mask) = 1
+            if (present(normalize) .and. normalize) ws2 = ws / sum(ws) * size(ws)
+            tol = sum(mat * ws2)
         else
             tol = sum(mat)
         endif
-    else 
+    else
         vec = PACK(mat, mask)
 
         if (is_weight) then
-            w   = PACK(ws, mask)
+            w   = PACK(ws2, mask)
+            if (present(normalize) .and. normalize) w = w / sum(w) * size(w)
+            ! write (*, *) w !size(ws2, 1), size(ws2, 2)
             ! allocate( w(count(mask)) )
-            tol = sum(vec * (w / sum(w))) * size(w, 1)
+            tol = sum(vec * w)
             deallocate(w)
-        else 
+        else
             tol = sum(vec)
         endif
         deallocate(vec)
