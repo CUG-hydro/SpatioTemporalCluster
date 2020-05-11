@@ -43,7 +43,7 @@ plot.cluster <- function(idClusters, times = 1:4, range = NULL, origin = "1961-0
         y <- get_center(range[3:4], ncol)
     }
 
-    grid <- expand.grid(x=x, y=y)
+    grid <- expand.grid(x=x, y=y) %>% data.table()
     
     times <- times[times <= ntime]
     mat   <- idClusters[,,times]
@@ -71,7 +71,6 @@ plot.cluster <- function(idClusters, times = 1:4, range = NULL, origin = "1961-0
     df$value %<>% factor()
     
     pos_grid <- c(2, 4, 6, 8)+0.5
-    # browser()    
 
     # panel <- function(x, y, z, subscripts, ..., sp.layout) {
     #     # panel.levelplot(x, y, z, subscripts, ...)
