@@ -64,7 +64,11 @@ file.move <- function(file, target){
 }
 
 
+#' dir2
+#' 
 #' @param path file path of windows system
+#' 
+#' @export
 dir2 <- function(path, pattern = NULL, all.files = FALSE, 
     full.names = FALSE, recursive = FALSE, ...) 
 {

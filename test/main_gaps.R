@@ -31,9 +31,14 @@ get_date <- function(files){
     str_extract(basename(files), "\\d{8}") %>% ymd()
 }
 
-get_miss <- function(files, dates_all){
-    lst_dates <- files %>% split_vars() %>% map(get_date)
-    lst_miss <- map(lst_dates, ~ setdiff(dates_all, .) %>% as.Date("1970-01-01"))
+get_miss <- function(files, dates_all, varname = NULL){
+    lst <- files %>% split_vars() 
+    if (length(lst) == 0) lst = list(x = files)
+    if (!is.null(varname)) lst %<>% set_names(varname)
+
+    lst_date <- map(lst, get_date)
+    lst_miss  <- map(lst_date, ~ setdiff(dates_all, .) %>% as.Date("1970-01-01"))     
+    
     d_miss <- map(lst_miss, ~ data.table(date = ., year = year(.), ym = format(., "%Y%m"))) %>% 
         melt_list("variable") %>% 
         .[order(ym), ] %>% 
