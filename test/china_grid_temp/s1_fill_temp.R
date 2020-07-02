@@ -26,7 +26,6 @@ ilon <- match(seq(72+cellsize/2, 136, cellsize), seq(70+cellsize/2, 140, cellsiz
 ilat <- match(seq(18+cellsize/2, 54, cellsize) , seq(15+cellsize/2, 55, cellsize))
 
 # need to fill gaps in 2019
-
 # ------------------------------------------------------------------------------
 
 # files2 <- dir("/mnt/e/github/Research/cmip5/DATA/ChinaData/temp_daily_0.5deg2/", "*.txt|*.TXT", full.names = TRUE)

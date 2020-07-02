@@ -19,7 +19,7 @@
 #' * cellCoor index of masked region.
 #' 
 #' @example man/example/ex-droughtIndictor.R
-#' 
+
 #' @export
 droughtIndicator <- function(mat, mask, SMI_thld, exceeding = TRUE, masked = FALSE){
     nrows   <- nrow(mask)
