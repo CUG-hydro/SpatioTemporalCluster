@@ -4,8 +4,14 @@
 \alias{plot.cluster}
 \title{Plot drought cluster result}
 \usage{
-plot.cluster(idClusters, times = 1:4, range = NULL,
-  origin = "1961-01-01", ..., sp.layout = NULL)
+plot.cluster(
+  idClusters,
+  times = 1:4,
+  range = NULL,
+  origin = "1961-01-01",
+  ...,
+  sp.layout = NULL
+)
 }
 \arguments{
 \item{idClusters}{obj returned by \code{\link[=ClusterEvolution]{ClusterEvolution()}}}

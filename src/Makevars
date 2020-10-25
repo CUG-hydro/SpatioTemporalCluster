@@ -33,7 +33,7 @@ FCFLAGS2 = -I$(DIR_NETCDF)/include
 all:
 	# echo @$(MAKE) $(SHLIB)
 	@$(MAKE) $(SHLIB)
-	@rm -f *.mod *.o 
+	# @rm -f *.mod *.o 
 	#*.dll *.so
 
 $(SHLIB): $(OBJS) ${C_OBJS}

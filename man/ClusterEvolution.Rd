@@ -7,9 +7,9 @@
 ClusterEvolution(SMIc, cellCoor, thCellClus = 1L, nCellInter = 1L)
 }
 \arguments{
-\item{SMIc}{integer array, \code{[nrow, ncol, ntime]}}
+\item{SMIc}{integer array, \verb{[nrow, ncol, ntime]}}
 
-\item{cellCoor}{integer matrix, \code{[nCells, 2]}}
+\item{cellCoor}{integer matrix, \verb{[nCells, 2]}}
 
 \item{thCellClus}{treshold  for cluster formation in space}
 

@@ -33,21 +33,21 @@ contains
     character(len=*), intent(in) :: unit
     integer(i4)             :: ii, day, month
 
-    period_init%y_start = y_start
-    period_init%m_start = m_start
-    period_init%d_start = d_start
-    period_init%y_end = y_end
-    period_init%m_end = m_end
-    period_init%d_end = d_end
+    period_init%y_start     = y_start
+    period_init%m_start     = m_start
+    period_init%d_start     = d_start
+    period_init%y_end       = y_end
+    period_init%m_end       = m_end
+    period_init%d_end       = d_end
     period_init%time_points = time_points
-    period_init%unit = trim(unit)
+    period_init%unit        = trim(unit)
 
     
-    period_init%j_start = date2dec(period_init%d_start, period_init%m_start, period_init%y_start)
-    period_init%j_end = date2dec(period_init%d_end, period_init%m_end, period_init%y_end)
+    period_init%j_start  = date2dec(period_init%d_start, period_init%m_start, period_init%y_start)
+    period_init%j_end    = date2dec(period_init%d_end, period_init%m_end, period_init%y_end)
 
-    period_init%n_years = period_init%y_end - period_init%y_start + 1_i4
-    period_init%n_days = period_init%j_end - period_init%j_start + 1_i4
+    period_init%n_years  = period_init%y_end - period_init%y_start + 1_i4
+    period_init%n_days   = period_init%j_end - period_init%j_start + 1_i4
     period_init%n_months = (12_i4 - period_init%m_start + 1_i4) &
         + (period_init%y_end - period_init%y_start - 1_i4) * 12_i4 &
         + period_init%m_end

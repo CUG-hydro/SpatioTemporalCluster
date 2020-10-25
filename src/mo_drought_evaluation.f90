@@ -156,10 +156,10 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
 
   ! local variables
   integer(i4)                              :: i, j, t
-  integer(i4), dimension(:),   allocatable :: nC             ! num of clusters per time step
-  integer(i4), parameter                   :: factor = 100   ! max number of clusters per month
-  integer(i4)                              :: ncInter        ! integer, overlaped grids
-  integer(i4), dimension(:,:), allocatable :: cno            ! clusters_num_id [nMonth, nC_j]
+  integer(i4), dimension(:),   allocatable :: nC              ! num of clusters per time step
+  integer(i4), parameter                   :: factor = 100000 ! max number of clusters per month
+  integer(i4)                              :: ncInter         ! integer, overlaped grids
+  integer(i4), dimension(:,:), allocatable :: cno             ! clusters_num_id [nMonth, nC_j]
   integer(i4), dimension(:),   allocatable :: cnoList
   integer(i4), dimension(:),   allocatable :: vec
   integer(i4)                              :: maxNc, nTotal, idRep
