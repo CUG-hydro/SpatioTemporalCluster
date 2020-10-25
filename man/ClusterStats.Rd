@@ -19,7 +19,7 @@ ClusterStats(
 \item{mat}{double matrix, with the dim of \verb{[ngrid, nmonth]}, (\code{nmask = nrow*ncol}).
 SMI drought index.}
 
-\item{mask}{logical matrix, \verb{[nrow, ncol]}.}
+\item{mask}{logical matrix, \verb{[nrow, ncol]}, only TRUE will be proceed.}
 
 \item{SMI_thld}{double number,}
 
@@ -43,24 +43,52 @@ Calculate drought status
 # devtools::load_all()
 library(heatwave)
 
-set.seed(1)
+{
+    set.seed(1)
+    
+    n = 1000
+    nrow <- n
+    ncol <- n
+    ngrid <- nrow*ncol
+    ntime <- 12
+    
+    mat <- matrix(rnorm(nrow*ncol*ntime), ngrid, ntime)
+    SMI_thld <- 0.5
+    mask <- matrix(mat[,1], nrow, ncol) > SMI_thld
+    
+    arr <- array(mat, dim = c(nrow, ncol, ntime)) > SMI_thld
+}
 
-nrow <- 10
-ncol <- 10
-ngrid <- nrow*ncol
-ntime <- 12
-
-mat <- matrix(rnorm(nrow*ncol*ntime), ngrid, ntime)
-mask <- matrix(mat[,1], nrow, ncol) > 0.5
-SMI_thld <- 0.2
+library(JuliaCall)
+julia_source("external/find_neighbors.jl")
+idC = julia_call("spatial_cluster", arr)
+idC2 = julia_call("time_connect", idC, factor = 1e3)
 
 r  <- droughtIndicator( mat, mask, SMI_thld)    
 r_cluster <- ClusterEvolution(r$SMIc, r$cellCoor)
-r_status  <- ClusterStats(mat, mask, SMI_thld, r_cluster$idCluster, r_cluster$shortCnoList)
+
+{
+   
+    system.time(r_status  <- ClusterStats(mat, mask, SMI_thld, r_cluster$idCluster, r_cluster$shortCnoList))
+}
 
 ## 2. visualization ------------------------------------------------------------
 # devtools::install_github("kongdd/Ipaper")
-# p <- plot.cluster(r2)
-# ratio = 0.8
-# Ipaper::write_fig(p, "a.pdf", 12*ratio, 8*ratio)
+{
+    p <- plot.cluster(r_cluster$idCluster, 1:6)
+    ratio = 0.8
+    write_fig(p, "b.pdf", 12*ratio, 8*ratio)
+}
+
+{
+    p <- plot.cluster(idC, 1:6)
+    ratio = 0.8
+    write_fig(p, "r_julia.pdf", 12*ratio, 8*ratio)
+}
+
+{
+    p <- plot.cluster(idC2, 1:6)
+    ratio = 0.8
+    write_fig(p, "r_julia_final.pdf", 12*ratio, 8*ratio)
+}
 }

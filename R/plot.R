@@ -51,7 +51,7 @@ plot.cluster <- function(idClusters, times = 1:4, range = NULL, origin = "1961-0
     origin <- as.Date(origin)
     date   <- seq(origin, origin + length(times) - 1, by = "day")
 
-    mat[mat == -9999L] = NA_integer_
+    mat[mat %in% c(-9999L, 0L)] = NA_integer_
     
     dim(mat) <- c(nrow*ncol, length(times))
     I_good <- colSums2(!is.na(mat), na.rm = TRUE) %>% {which(. > 0)}

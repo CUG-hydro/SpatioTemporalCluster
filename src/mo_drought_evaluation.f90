@@ -165,7 +165,6 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
   integer(i4)                              :: maxNc, nTotal, idRep
   integer(i4), dimension(:,:), allocatable :: idCnew
 
-
   if ( allocated(cno) )             deallocate (cno, vec, cnoList)  
   ! if ( allocated(idCluster))        deallocate (idCluster, shortCnoList, nClusters)
   
@@ -213,20 +212,25 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
   ! FIND CLUSTERS IN TIME
   ! determine intersection sets, join
   ! ---------------------------------
+  ! 空间事件在时间上的连接
+  ! PARAMETERS
+  ! cno       : [ntime, ncluster]
+  ! idCluster : [nlat, nlon, ntime]
+  ! nCellInter: minimum grids for an event
   do t=2,nMonths
-     do i=1,nC(t)
-        if (cno(t,i) == -9) cycle
-        do j=1,nC(t-1) ! 上一时刻所有cluster
-           if (cno(t-1,j) == -9) cycle
-           ncInter = count ( idCluster(:,:,t) == cno(t,i) .and. idCluster(:,:,t-1) == cno(t-1,j) )
-           if ( ncInter >= nCellInter ) then
-              ! renumber all from 1 to t, 为何是1:t?
-              where ( idCluster(:,:,1:t) == cno(t-1,j) ) idCluster(:,:,1:t) =  cno(t,i) ! 空间上编号更新
-              ! rename cluster id from cno
-              where ( cno(1:t,:) == cno(t-1,j) ) cno(1:t,:) = cno(t,i) ! 更新成现在的编号
-           end if
-        end do
-     end do
+    do i=1,nC(t)
+      if (cno(t,i) == -9) cycle
+      do j=1,nC(t-1) ! 上一时刻所有cluster
+        if (cno(t-1,j) == -9) cycle
+        ncInter = count ( idCluster(:,:,t) == cno(t,i) .and. idCluster(:,:,t-1) == cno(t-1,j) )
+        if ( ncInter >= nCellInter ) then
+          ! renumber all from 1 to t, 为何是1:t?
+          where ( idCluster(:,:,1:t) == cno(t-1,j) ) idCluster(:,:,1:t) =  cno(t,i) ! 空间上编号更新
+          ! rename cluster id from cno
+          where ( cno(1:t,:) == cno(t-1,j) ) cno(1:t,:) = cno(t,i) ! 更新成现在的编号
+        end if
+      end do
+    end do
   end do
   ! print*, 'Clustering in time done ...'
   ! --------------------------
@@ -342,7 +346,6 @@ subroutine ClusterStats( SMI, mask, nrows, ncols, nMonths, nCells, SMI_thld, mGr
            ! duration
            aDDG = aDDG + 1
         end where
-        !
         !  drought area evolution
         !  TODO: area-weighted
         dummy_mask = idCluster(:,:,t) == shortCnoList(ic)
@@ -602,7 +605,7 @@ subroutine findClusters (cellCoor, thCellClus, t,iC,nCluster, nrows, ncols, nCel
   integer(i4), dimension(:), allocatable                :: nCxCluster
   integer(i4)                                           :: nClusterR, ncc
   !
-  iC = nodata_i4
+  iC = nodata_i4 ! matrix of ClusterNO
   nCluster = 0
   do k = 1, nCells
      krow = cellCoor(k,1)
@@ -618,10 +621,10 @@ subroutine findClusters (cellCoor, thCellClus, t,iC,nCluster, nrows, ncols, nCel
         nCluster=nCluster+1
         iC(krow, kcol) = nCluster
      end if
+
      do j=jul, jdr
         do i= iul, idr
-           if (iC(i,j) == nodata_i4 .and. &
-                SMIc(i,j,t) == klu                     ) then
+           if ( iC(i,j) == nodata_i4 .and. SMIc(i,j,t) == klu ) then
               iC(i,j) = iC(krow, kcol)
            end if
         end do
@@ -646,9 +649,11 @@ subroutine findClusters (cellCoor, thCellClus, t,iC,nCluster, nrows, ncols, nCel
         do j=jul, jdr
            do i= iul, idr
               klu1 = iC(i, j)
+              ! rm this cluster, if
+              ! what's the purpose?
               if ( klu  /= nodata_i4 .and. &
                    klu1 /= nodata_i4 .and. &
-                   klu  /= klu1                       ) then
+                   klu  /= klu1 ) then
                  cno(klu1) = -9
                  nClusterR = nClusterR - 1
                  where ( iC == klu1 ) iC = klu
@@ -656,7 +661,7 @@ subroutine findClusters (cellCoor, thCellClus, t,iC,nCluster, nrows, ncols, nCel
            end do
         end do
      end do
-     !
+     
      ! delete small clusters < thesh. area
      do i=1, nCluster
         if (cno(i) == -9 ) cycle
@@ -671,7 +676,6 @@ subroutine findClusters (cellCoor, thCellClus, t,iC,nCluster, nrows, ncols, nCel
      ! reordering
      cno = pack (cno, mask = cno > 0, vector=vec)
      where (cno <= 0) cno = 0
-     !
      !
      allocate (nCxCluster(nClusterR))
      do i=1, nClusterR

@@ -6,7 +6,7 @@
 #'  
 #' @param mat double matrix, with the dim of `[ngrid, nmonth]`, (`nmask = nrow*ncol`). 
 #' SMI drought index.
-#' @param mask logical matrix, `[nrow, ncol]`.
+#' @param mask logical matrix, `[nrow, ncol]`, only TRUE will be proceed.
 #' @param SMI_thld double number, 
 #' @param exceeding Boolean. How to define a event? Exceed the threshold or less than?
 #' For examples, for heatwaves, `exceeding` should be true; for drought, cold waves 
