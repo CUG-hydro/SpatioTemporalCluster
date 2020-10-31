@@ -18,7 +18,7 @@
 #' * SMIc a drought status array with 0 (non-drought), 1 (drought), -9999 (NA).
 #' * cellCoor index of masked region.
 #' 
-#' @example man/example/ex-droughtIndictor.R
+#' @example example/ex-droughtIndictor.R
 
 #' @export
 droughtIndicator <- function(mat, mask, SMI_thld, exceeding = TRUE, masked = FALSE){

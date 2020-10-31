@@ -12,6 +12,7 @@ end
 # mat_bool: continuous TRUE will be grouped together
 # # return
 # - `0`: not TRUE in `mat_bool`
+# - `1`: cells less than minCells
 # - `NO`: cluster NO, which is great 
 function find_clutser(mat_bool::AbstractArray{Bool,2}, IdCluster, i::Int, j::Int, opt; 
     miss_val::Int = -999) 
@@ -61,6 +62,7 @@ function spatial_cluster!(mat_bl::AbstractArray{Bool, 2}, IdCluster::AbstractArr
     IdCluster
 end
 
+
 function spatial_cluster(mat_bl::AbstractArray{Bool, 3}; 
     time_factor::Int = 1000000, 
     minCells::Int = 25)
@@ -76,41 +78,46 @@ function spatial_cluster(mat_bl::AbstractArray{Bool, 3};
         cluster = @view(IdClusters[:,:,t])
         spatial_cluster!(@view(mat_bl[:,:,t]), cluster, ID0 = time_factor*t)
         
-        println("hello")
         # count how many clusters and filter small clusters
         info = countmap(cluster[:]) # filter 
         ids_short = filter(x -> ( x[2] < minCells ), info) |> keys # 1: key, 2: val
 
-        println("hello")
-        for id in ids_short
-            cluster[cluster .== id] .= -1
+        # save("debug.jld", "ids_short", ids_short, "cluster", cluster)
+        # println("ids_short: ", length(ids_short))
+        @inbounds for i in eachindex(cluster)
+            if cluster[i] in ids_short; cluster[i] = -1; end
         end
-        ids_long = filter(x -> ( x[2] < minCells ), info) |> keys
+
+        ids_long = filter(x -> ( x[2] > minCells ), info) |> keys
         ids_long = setdiff(ids_long, 0)
         
-        # get cno info 
         nC[t] = length(ids_long)
+        # get cno info 
         push!(cno_list, ids_long)
         # cluster = spatial_cluster!(mat_bl[:,:,t], IdCluster[:,:,t])
         # IdCluster[:,:,t] = cluster
     end
-    nC, cno_list, IdClusters
+    cno = list2mat(cno_list)
+    nC, cno, IdClusters
 end
 
-function replace_val!(mat::AbstractArray{T,3}, t::Int, val_org::T, val_new::T) where {T <: Real}
-    # inds = CartesianIndices(mat)
-    nrow, ncol, ntime = size(mat)
-    @inbounds for i = 1:nrow, j = 1:ncol, k = 1:t
-        # for ind = inds
-        if mat[i, j, k] == val_org; mat[i, j, k] = val_new; end
+
+function list2mat(list)
+    nc = []
+    for x in list; push!(nc, length(x)); end
+
+    cmax = maximum(nc)
+    ntime = length(list)
+    mat = zeros(Int, cmax, ntime)
+    println(size(mat))
+
+    for i = 1:ntime
+        x = list[i]
+        mat[1:length(x), i] = collect(x)
     end
+    mat
 end
 
-function replace_val!(mat::AbstractArray{T,2}, t::Int, val_org::T, val_new::T) where {T <: Real}
-    # inds = CartesianIndices(mat)
-    nrow, ntime = size(mat)
-    @inbounds for i = 1:nrow, k = 1:t
-        # for ind = inds
-        if mat[i, k] == val_org; mat[i, k] = val_new; end
-    end
-end
+
+export spatial_cluster
+

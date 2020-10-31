@@ -10,7 +10,7 @@
 #' @author
 #' Budapest, 10-11.03.2011
 #' 
-#' @example man/example/ex-droughtIndictor.R
+#' @example example/ex-droughtIndictor.R
 #' 
 #' @import magrittr
 #' @export

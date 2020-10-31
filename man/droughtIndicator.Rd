@@ -36,50 +36,51 @@ library(heatwave)
 
 {
     set.seed(1)
-    
-    n = 1000
+    n <- 100
     nrow <- n
     ncol <- n
-    ngrid <- nrow*ncol
+    ngrid <- nrow * ncol
     ntime <- 12
-    
-    mat <- matrix(rnorm(nrow*ncol*ntime), ngrid, ntime)
+
+    mat <- matrix(rnorm(nrow * ncol * ntime), ngrid, ntime)
     SMI_thld <- 0.5
-    mask <- matrix(mat[,1], nrow, ncol) > SMI_thld
-    
+    mask <- matrix(mat[, 1], nrow, ncol) > SMI_thld
     arr <- array(mat, dim = c(nrow, ncol, ntime)) > SMI_thld
 }
 
-library(JuliaCall)
-julia_source("external/find_neighbors.jl")
-idC = julia_call("spatial_cluster", arr)
-idC2 = julia_call("time_connect", idC, factor = 1e3)
+{
+    library(JuliaCall)
+    julia_setup(rebuild = TRUE)
+    julia_source("cluster/src/cluster.jl")
+    # system.time(res <- julia_call("cluster.spatial_cluster", arr))
+    # names(res) <- c("nC", "cno", "IdClusters")
+    res = julia_call("cluster.cluster_spatiotemporal", arr)
+}
 
-r  <- droughtIndicator( mat, mask, SMI_thld)    
+r <- droughtIndicator(mat, mask, SMI_thld)
 r_cluster <- ClusterEvolution(r$SMIc, r$cellCoor)
 
 {
-   
-    system.time(r_status  <- ClusterStats(mat, mask, SMI_thld, r_cluster$idCluster, r_cluster$shortCnoList))
+    system.time(r_status <- ClusterStats(mat, mask, SMI_thld, r_cluster$idCluster, r_cluster$shortCnoList))
 }
 
 ## 2. visualization ------------------------------------------------------------
 # devtools::install_github("kongdd/Ipaper")
 {
     p <- plot.cluster(r_cluster$idCluster, 1:6)
-    ratio = 0.8
-    write_fig(p, "b.pdf", 12*ratio, 8*ratio)
+    ratio <- 0.8
+    write_fig(p, "b.pdf", 12 * ratio, 8 * ratio)
 }
 
 {
     p <- plot.cluster(idC, 1:6)
-    ratio = 0.8
-    write_fig(p, "r_julia.pdf", 12*ratio, 8*ratio)
+    ratio <- 0.8
+    write_fig(p, "r_julia.pdf", 12 * ratio, 8 * ratio)
 }
 
 {
     p <- plot.cluster(idC2, 1:6)
-    ratio = 0.8
-    write_fig(p, "r_julia_final.pdf", 12*ratio, 8*ratio)
+    ratio <- 0.8
+    write_fig(p, "r_julia_final.pdf", 12 * ratio, 8 * ratio)
 }
 }

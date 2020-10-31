@@ -8,6 +8,14 @@ r1 <- raster("F:/urban/CLUDA_2015_88_1km_prop.tif")
 r2 <- raster("F:/urban/CLUDA_2015_89_1km_prop.tif")
 r = r1 + r2
 
+arr <- as.array(r)
+
+library(JuliaCall)
+julia_source("cluster/src/cluster.jl")
+system.time(res <- julia_call("cluster.spatial_cluster", arr >= 0.2))
+names(res) <- c("nC", "cno", "IdClusters")
+
+# idC2 = julia_call("time_connect", idC, factor = 1e3)
 mat = as.matrix(r)
 dim = dim(mat)
 nrow <- dim[1]
@@ -25,7 +33,6 @@ r  <- droughtIndicator( mat2, mask, SMI_thld)
 # write_fig({
 #     image(r$SMIc[,,1])    
 # }, "a.tif")
-
 # r_ans = r
 # values(r_ans) <- r$SMIc
 # writeRaster(r_ans, "urban_No.tif")
@@ -34,6 +41,7 @@ system.time({
     r_cluster <- ClusterEvolution(r$SMIc, r$cellCoor)    
 })
 # r_status  <- ClusterStats(mat, mask, SMI_thld, r_cluster$idCluster, r_cluster$shortCnoList)
+
 
 ## 2. visualization ------------------------------------------------------------
 # devtools::install_github("kongdd/Ipaper")

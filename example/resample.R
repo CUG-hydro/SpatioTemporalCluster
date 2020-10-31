@@ -10,6 +10,5 @@ file <- "N:/DATA/Population/China/pop2015_wgs84.tif"
 x <- readGDAL(file)
 
 plot(x)
-
 # need to sum, not simply mean or nearest
 y <- resample(raster(x), raster(grid))

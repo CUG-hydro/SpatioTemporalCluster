@@ -6,7 +6,7 @@
 #' @param shortCnoList vector, cluster num_id
 #' @param mGridArea matrix of grid area
 #' 
-#' @example man/example/ex-droughtIndictor.R
+#' @example example/ex-droughtIndictor.R
 #' 
 #' @export
 ClusterStats <- function(mat, mask, SMI_thld, 

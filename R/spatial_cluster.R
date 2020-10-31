@@ -53,6 +53,7 @@ find_cluster <- function(matrix, clusterID, i, j, miss.val = -999, diag = FALSE)
         return(clusterID)
     }
 }
+
 #' @title Find all clusters in a matrix
 #' @description Find all clusters in space with the function find_cluster
 #' @param matrix a nxm matrix. Only TRUE and FALSE are included in this matrix.
