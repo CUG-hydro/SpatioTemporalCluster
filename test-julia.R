@@ -24,8 +24,8 @@
     system.time({
         IdClusters = julia_call("cluster.cluster_spatiotemporal", arr, 
                                 time_factor = as.integer(10000), # max clusters for each time
-                                minOverlapCells = as.integer(2),
-                                minCells = as.integer(2))    
+                                minOverlapCells = as.integer(25),
+                                minCells = as.integer(25))    
     })
 }
 

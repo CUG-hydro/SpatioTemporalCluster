@@ -40,31 +40,7 @@ If not, 3d mat will be masked by \code{mask} and transfer to 2d matrix.}
 Calculate drought status
 }
 \examples{
-# devtools::load_all()
-library(heatwave)
-
-{
-    set.seed(1)
-    n <- 100
-    nrow <- n
-    ncol <- n
-    ngrid <- nrow * ncol
-    ntime <- 12
-
-    mat <- matrix(rnorm(nrow * ncol * ntime), ngrid, ntime)
-    SMI_thld <- 0.5
-    mask <- matrix(mat[, 1], nrow, ncol) > SMI_thld
-    arr <- array(mat, dim = c(nrow, ncol, ntime)) > SMI_thld
-}
-
-{
-    library(JuliaCall)
-    julia_setup(rebuild = TRUE)
-    julia_source("cluster/src/cluster.jl")
-    # system.time(res <- julia_call("cluster.spatial_cluster", arr))
-    # names(res) <- c("nC", "cno", "IdClusters")
-    res = julia_call("cluster.cluster_spatiotemporal", arr)
-}
+julia_eval("")
 
 r <- droughtIndicator(mat, mask, SMI_thld)
 r_cluster <- ClusterEvolution(r$SMIc, r$cellCoor)

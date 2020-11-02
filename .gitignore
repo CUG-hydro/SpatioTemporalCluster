@@ -28,3 +28,5 @@ src-x64/
 # data
 *.rda
 *.jld
+*.nc
+*.txt

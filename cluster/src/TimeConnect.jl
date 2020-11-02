@@ -3,9 +3,14 @@
 function TimeConnect(
     IdClusters::AbstractArray{Int, 3}, 
     cno::AbstractArray{Int, 2}; 
-    minOverlapCells::Int = 25, factor::Int = 1000, ID_min::Int = 0) 
+    minOverlapCells::Int = 25, ID_min::Int = 0) 
 
     nlat, nlon, ntime = size(IdClusters)
+    
+    # mask to speed up replace_val
+    mask = sum(IdClusters .> 0, dims = 3)[:, :, 1] .> 0 # 
+    mask_ind = findall(mask)
+
     # cmax  = size(cno, 1)
     for t = 2:ntime
         cluster_now = @view(IdClusters[:, :, t])
@@ -17,7 +22,7 @@ function TimeConnect(
         ids_long = filter(x -> ( x[2] >= minOverlapCells ), ids_raw)
         ids_now = keys(ids_long)
         # NOs_no = cluster_now[ind_overlap] |> unique |> sort
-        println("clusters: ", length(ids_now))
+        println("t = $t, clusters: ", length(ids_now))
 
         i = 0
         for id_now in ids_now
@@ -38,8 +43,8 @@ function TimeConnect(
 
                 if ncInter >= minOverlapCells
                     # println((id_pre, id_now))
-                    replace_val!(IdClusters, t, id_pre, id_now)
-                    replace_val!(cno, t, id_pre, id_now)
+                    replace_IdCluster!(IdClusters, mask_ind, t, id_pre, id_now)
+                    replace_cno!(cno, t, id_pre, id_now)
                 end
             end
         end
