@@ -17,8 +17,7 @@ arr_urban_ratio <- abind(lst_urban, along = 3)
 arr_urban <- arr_urban >= 0.5
 
 {
-    library(JuliaCall)
-    julia_source("cluster/src/cluster.jl")
+    
     # system.time(res <- julia_call("cluster.spatial_cluster", arr >= 0.2))
     # names(res) <- c("nC", "cno", "IdClusters")
     system.time({

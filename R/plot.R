@@ -97,6 +97,7 @@ plot.cluster <- function(idClusters, times = 1:4, range = NULL, origin = "1961-0
                 # panel.abline(v = pos_grid, col = color, lty = lty, lwd = lwd)
 
                 panel.levelplot.raster(x, y, z, subscripts, ...)
+                panel.grid()
                 
                 I <- subscripts[which(!is.na(z[subscripts]))]
                 d_lab <- data.table(x = x[I], y = y[I], labels = z[I])

@@ -1,19 +1,9 @@
-#! /usr/bin/Rscript
+# #! /usr/bin/Rscript
+# 
+# # library(heatwave)
 
-# library(heatwave)
-{
-    set.seed(1)
-    n <- 1000
-    nrow <- n
-    ncol <- n
-    ngrid <- nrow * ncol
-    ntime <- 12
-
-    mat <- matrix(rnorm(nrow * ncol * ntime), ngrid, ntime)
-    SMI_thld <- 0.5
-    mask <- matrix(mat[, 1], nrow, ncol) > SMI_thld
-    arr <- array(mat, dim = c(nrow, ncol, ntime)) > SMI_thld
-}
+library(abind)
+arr <- abind(matrix, along = 3)
 
 {
     library(JuliaCall)
@@ -24,13 +14,19 @@
     system.time({
         IdClusters = julia_call("cluster.cluster_spatiotemporal", arr, 
                                 time_factor = as.integer(10000), # max clusters for each time
-                                minOverlapCells = as.integer(25),
-                                minCells = as.integer(25))    
+                                minOverlapCells = as.integer(5),
+                                minCells = as.integer(1))    
     })
 }
 
 {
+    IdClusters[IdClusters <= 0] <- NA
     p <- plot.cluster(IdClusters, 1:9)
     ratio <- 0.8
     write_fig(p, "r_julia_final.pdf", 12 * ratio, 8 * ratio)
 }
+
+# 
+
+
+
