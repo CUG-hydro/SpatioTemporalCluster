@@ -39,6 +39,5 @@ ClusterEvolution <- function(SMIc, cellCoor, thCellClus = 1L, nCellInter = 1L){
     if (length(r$shortCnoList) != r$nCluster) {
         stop("[e]: shortCnoList not equal to nCluster!")
     }
-    # idCluster2
     r
 }

@@ -7,3 +7,4 @@
 ^codecov\.yml$
 ^src/mo_weight$
 ^Figures$
+^data-raw$

@@ -1,11 +1,11 @@
-Package: heatwave
+Package: SpatioTemporal.cluster
 Type: Package
-Title: heatwave
+Title:SpatioTemporal.cluster
 Version: 1.0
 Date: 2019-08-29
 Authors@R: person("Dongdong", "Kong", email = "kongdd.sysu@gmail.com",
   role = c("aut", "cre"))
-Description: Heatwaves in spatial.
+Description: SpatioTemporal cluster.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports: Rcpp (>= 1.0.2), 

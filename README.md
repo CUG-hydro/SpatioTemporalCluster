@@ -1,25 +1,27 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# heatwave
+# SpatioTemporal.cluster
 
 <!-- badges: start -->
 
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/kongdd/heatwave?branch=master&svg=true)](https://ci.appveyor.com/project/kongdd/heatwave)
-[![Travis build status](https://travis-ci.org/kongdd/heatwave.svg?branch=master)](https://travis-ci.org/kongdd/heatwave)
-[![Codecov test coverage](https://codecov.io/gh/kongdd/heatwave/branch/master/graph/badge.svg)](https://codecov.io/gh/kongdd/heatwave?branch=master)
-
+[![AppVeyor build
+status](https://ci.appveyor.com/api/projects/status/github/kongdd/heatwave?branch=master&svg=true)](https://ci.appveyor.com/project/kongdd/heatwave)
+[![Travis build
+status](https://travis-ci.org/kongdd/heatwave.svg?branch=master)](https://travis-ci.org/kongdd/heatwave)
+[![Codecov test
+coverage](https://codecov.io/gh/kongdd/heatwave/branch/master/graph/badge.svg)](https://codecov.io/gh/kongdd/heatwave?branch=master)
 <!-- badges: end -->
 
-The goal of heatwave is to …
+The goal of SMI is to …
 
 ## Installation
 
-You can install the latest version of heatwave from
-[github](https://github.com/kongdd/heatwave) with:
+You can install the released version of SMI from
+[CRAN](https://CRAN.R-project.org) with:
 
 ``` r
-devtools::install_github("heatwave")
+devtools::install_github("kongdd/SpatioTemporal.cluster")
 ```
 
 ## Example
@@ -27,7 +29,7 @@ devtools::install_github("heatwave")
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
-library(heatwave)
+library(SpatioTemporal.cluster)
 ## basic example code
 ```
 
