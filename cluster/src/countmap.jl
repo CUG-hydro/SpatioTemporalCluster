@@ -14,3 +14,5 @@ function countmap(vec::AbstractArray{T, 1}) where {T <: Int}
     end
     Dict(keys[i] => counts[i] for i in eachindex(keys))
 end
+
+export countmap

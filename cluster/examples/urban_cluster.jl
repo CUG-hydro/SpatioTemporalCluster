@@ -1,13 +1,4 @@
-using GeoArrays
-using Printf
-using cluster
-using JLD
-using NetCDF
-using DelimitedFiles
-# using Plots
-# gr()
-
-year = 2015
+year  = 2015
 years = 1980:2015
 nyear = length(years)
 arr_urban_perc = zeros(7392, 5967, length(years))
@@ -55,12 +46,8 @@ for year in years
 end
 writedlm("cno_(50%).txt",  cno, ',')
 
-## save into tif file directly
-ga = GeoArray(IdClusters)
-bbox!(ga, (min_x = 73.48769838361044, min_y = 3.8363272523055656, max_x = 135.08769813715907, max_y = 53.561327053364096))
-epsg!(ga, 4326)  # in WGS84
-
+## save into tif file directly -------------------------------------------------
+ga = as_raster(IdClusters, range)
 outfile = "OUTPUT/urban_IdClusters.tif"
 GeoArrays.write!(outfile, ga)  
-
-@time x = GeoArrays.read(outfile)
+# @time x = GeoArrays.read(outfile)

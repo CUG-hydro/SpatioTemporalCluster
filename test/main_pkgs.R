@@ -37,7 +37,7 @@ suppressMessages({
     library(Ipaper)
     library(sp2)
     library(phenofit)
-    library(Rcmip5)
+    # library(Rcmip5)
     library(missInfo)
     library(ECOF)
 
@@ -47,8 +47,7 @@ suppressMessages({
 })
 
 
-source("../Rcmip5/R/colors.R")
-
+# source("../Rcmip5/R/colors.R")
 cellsize <- 0.5
 range    <- c(72, 136, 18, 54)
 range_nc <- c(70, 140, 15, 55)
