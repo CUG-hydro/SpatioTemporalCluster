@@ -40,36 +40,37 @@ HW_characteristics <- function(r_cluster, r_status, origin = "1961-01-01"){
     df
 }
 
-HW_cluster <- function(arr, mGridArea, prob, nCellInter){
-    TRS  <- apply_3d(arr, 3, rowQuantiles, probs = prob) # 相当于 3 times/year
+# HW_cluster <- function(arr, mGridArea, prob, nCellInter){
+#     TRS  <- apply_3d(arr, 3, rowQuantiles, probs = prob) # 相当于 3 times/year
 
-    lst <- foreach(year = 1961:2019 %>% set_names(., .), i = icount()) %do% {
-        runningId(year)
+#     lst <- foreach(year = 1961:2019 %>% set_names(., .), i = icount()) %do% {
+#         runningId(year)
         
-        I_year   <- which(years == year)
-        arr_year <- arr[,, I_year]
+#         I_year   <- which(years == year)
+#         arr_year <- arr[,, I_year]
 
-        mat  <- array_3dTo2d(arr_year, I_grid = which(mask))
+#         mat  <- array_3dTo2d(arr_year, I_grid = which(mask))
 
-        # TRS = 35
-        # 添加中国底图
-        r <- eventIndicator( mat, mask, SMI_thld = TRS, masked = TRUE)
-        r_cluster <- cluster_SpatioTemporal(r$SMIc, r$cellCoor, thCellClus = 16, nCellInter = nCellInter)
-        r_status  <- ClusterStats(mat, mask, SMI_thld = TRS, r_cluster$idCluster, r_cluster$shortCnoList, 
-            mGridArea = mGridArea, masked = TRUE)
+#         # TRS = 35
+#         # 添加中国底图
+#         ## bugs at here
+#         # r <- eventIndicator( mat, mask, SMI_thld = TRS, masked = TRUE)
+#         # r_cluster <- cluster_SpatioTemporal(r$SMIc, r$cellCoor, thCellClus = 16, nCellInter = nCellInter)
+#         # r_status  <- ClusterStats(mat, mask, SMI_thld = TRS, r_cluster$idCluster, r_cluster$shortCnoList, 
+#         #     mGridArea = mGridArea, masked = TRUE)
         
-        origin <- glue("{year}-01-01")
+#         origin <- glue("{year}-01-01")
 
-        d <- HW_characteristics(r_cluster, r_status, origin = origin)
-        # p <- plot.cluster(r_cluster$idCluster, times = NULL, range = range, origin = origin, sp.layout = sp_arc_CH) # , sp.layout = sp_arc_CH
-        # write_fig(p, "a.pdf", 16, 16)
-        # region <- arr_year[,,yday("2010-06-23")] >= 35 #%>% image()
-        # image(region)
-    }
-    df <- melt_list(lst, "year")
-    df$year %<>% as.numeric()
-    df
-}
+#         d <- HW_characteristics(r_cluster, r_status, origin = origin)
+#         # p <- plot.cluster(r_cluster$idCluster, times = NULL, range = range, origin = origin, sp.layout = sp_arc_CH) # , sp.layout = sp_arc_CH
+#         # write_fig(p, "a.pdf", 16, 16)
+#         # region <- arr_year[,,yday("2010-06-23")] >= 35 #%>% image()
+#         # image(region)
+#     }
+#     df <- melt_list(lst, "year")
+#     df$year %<>% as.numeric()
+#     df
+# }
 
 check_outlier <- function(x){
     x2 <- x[is.finite(x)]

@@ -67,7 +67,9 @@ find_cluster_backward <- function(clusterID, i, j){
 #' are sourced from Fortran language and written by
 #' Samaniego et al., nature climate change, 2018.
 #' @export
-connect_spatial_matrix <- function(matrix, ncell_connected = 1L, diag = FALSE){
+connect_spatial_matrix <- function(matrix, ncell_connected = 1L, diag = FALSE, 
+    .progress = FALSE)
+{
     #######Searching directions of the neighbouring grids#######################
     if (isTRUE(diag)){
         pos <- matrix(c(1,0, 0,1, -1,0, 0,-1, 1,1, 1,-1, -1,-1, -1,1),
@@ -98,13 +100,13 @@ connect_spatial_matrix <- function(matrix, ncell_connected = 1L, diag = FALSE){
         for (k in 1:ngrid){
             clusterID <- find_cluster_forward(matrix = matrix, clusterID = clusterID,
                                               i = index[[k]][1], j = index[[k]][2])
-            # cat(sprintf('=================[%.2f%s]', k/ngrid*100, '%'), '\n')
+            if (.progress) cat(sprintf('=================[%.2f%s]', k/ngrid*100, '%'), '\n')
         }
         ##################searching from bottm-right to top-left corner#########
         for (k in ngrid:1){
             clusterID <- find_cluster_backward(clusterID = clusterID,
                                                i = index[[k]][1], j = index[[k]][2])
-            # cat(sprintf('=================[%.2f%s]', (ngrid+1-k)/ngrid*100, '%'), '\n')
+            if (.progress) cat(sprintf("=================[%.2f%s]", (ngrid + 1 - k) / ngrid * 100, "%"), "\n")
         }
         ##################exclude clusters with girds <= ncell_connected##################
         areas <- table(c(clusterID))
@@ -121,13 +123,15 @@ connect_spatial_matrix <- function(matrix, ncell_connected = 1L, diag = FALSE){
     return(clusterID)
 }
 
+#' @param ... others to [connect_spatial_matrix()]
+#' 
 #' @import foreach abind
 #' @rdname connect_spatial_matrix
 #' @export 
-connect_spatial <- function(arr, ncell_connected  = 1L, diag = FALSE, factor = 1e4) {
+connect_spatial <- function(arr, ncell_connected  = 1L, diag = FALSE, factor = 1e4, ...) {
     ntime = dim(arr) %>% last()
     clusterID <- foreach(i = 1:ntime) %do% {
-        connect_spatial_matrix(matrix = arr[, , i], ncell_connected = ncell_connected, diag = diag)
+        connect_spatial_matrix(matrix = arr[, , i], ncell_connected = ncell_connected, diag = diag, ...)
     } %>% abind(along = 3)
     clusterID_refactor(clusterID, factor = factor)
 }

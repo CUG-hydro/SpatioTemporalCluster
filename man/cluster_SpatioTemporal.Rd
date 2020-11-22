@@ -12,7 +12,8 @@ cluster_SpatioTemporal(
   cellCoor = NULL,
   ncell_connected = 1L,
   ncell_overlap = 1L,
-  factor = 10000
+  factor = 10000,
+  diag = FALSE
 )
 
 cluster_SpatioTemporal_julia(

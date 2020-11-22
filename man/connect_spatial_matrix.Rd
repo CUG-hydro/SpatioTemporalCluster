@@ -5,9 +5,14 @@
 \alias{connect_spatial}
 \title{Find all clusters in a matrix}
 \usage{
-connect_spatial_matrix(matrix, ncell_connected = 1L, diag = FALSE)
+connect_spatial_matrix(
+  matrix,
+  ncell_connected = 1L,
+  diag = FALSE,
+  .progress = FALSE
+)
 
-connect_spatial(arr, ncell_connected = 1L, diag = FALSE, factor = 10000)
+connect_spatial(arr, ncell_connected = 1L, diag = FALSE, factor = 10000, ...)
 }
 \arguments{
 \item{matrix}{a nxm matrix. Only TRUE and FALSE are included in this matrix.
@@ -17,6 +22,8 @@ TRUE indicates this grid is a congeneric grid, while FALSE indicates not.}
 
 \item{diag}{a logical value. If TRUE, the diagonal grids are taken as
 the adjacent congeneric grids.}
+
+\item{...}{others to \code{\link[=connect_spatial_matrix]{connect_spatial_matrix()}}}
 }
 \value{
 A matrix with the serial number for the identified cluster.

@@ -2,7 +2,13 @@ include("main_pkgs.jl")
 # using StatsBase
 
 # using RCall
-R"load('../debug.rda')"
+# R"load('../debug.rda')"
+# arr = randn(10, 10)
+using 
+Random.seed!(123);
+n = Int(1e3)
+data = rand(n, n, 12)
+
 # arr_raw = GeoArrays.read("../arr.tif").A .> 0;
 # IdClusters = GeoArrays.read("../arr.tif").A;
 begin
@@ -22,7 +28,7 @@ end
 
 counts = values(countmap(r[:])) |> collect |> sort
 
-using Plots
-pyplot()
-gr()
-heatmap(clutserId[:,:,1])
+# using Plots
+# pyplot()
+# gr()
+# heatmap(clutserId[:,:,1])

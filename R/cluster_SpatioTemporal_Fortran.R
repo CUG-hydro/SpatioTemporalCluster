@@ -94,7 +94,10 @@ eventIndicator <- function(arr, threshold, mask = NULL, exceeding = TRUE, masked
 #' 
 #' @import magrittr
 #' @export
-cluster_SpatioTemporal <- function(arr, cellCoor = NULL, ncell_connected = 1L, ncell_overlap = 1L, factor = 1e4){
+cluster_SpatioTemporal <- function(
+    arr, cellCoor = NULL, 
+    ncell_connected = 1L, ncell_overlap = 1L, factor = 1e4, diag = FALSE)
+{
     dim   <- dim(arr) 
     nrows <- dim[1]
     ncols <- dim[2]
@@ -110,7 +113,7 @@ cluster_SpatioTemporal <- function(arr, cellCoor = NULL, ncell_connected = 1L, n
     nCluster  = 0L
     r <- .Fortran("ClusterEvolution", 
                   arr, nrows, ncols, ntime, nCells, cellCoor, 
-                  as.integer(ncell_overlap), as.integer(ncell_connected), as.integer(factor), 
+                  as.integer(ncell_overlap), as.integer(ncell_connected), as.integer(factor), diag,
                   clusterId, nCluster)
     r <- set_names(last(r, 2), c("clusterId", "nCluster"))
     r$clusterId[r$clusterId == -9999L] = NA_integer_
@@ -120,5 +123,5 @@ cluster_SpatioTemporal <- function(arr, cellCoor = NULL, ncell_connected = 1L, n
     if (length(r$shortCnoList) != r$nCluster) {
         stop("[e]: shortCnoList not equal to nCluster!")
     }
-    r
+    r$clusterId
 }

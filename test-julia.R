@@ -8,8 +8,6 @@
     diag = FALSE
     # diag = TRUE
     
-    
-    
     # clusterId = r_cluster$clusterID
     # system.time()
     

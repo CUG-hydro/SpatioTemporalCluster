@@ -3,23 +3,34 @@
 test_that("julia,R,Fortran: cluster_SpatioTemporal works",
 {
     set.seed(100)
-    n <- 10
+    n <- 1000
     nrow <- n
     ncol <- n
     ngrid <- nrow * ncol
-    ntime <- 3
+    ntime <- 12
     arr <- (array(rnorm(nrow * ncol * ntime), dim = c(nrow, ncol, ntime))) > 0.2
 
     ## action now
-    diag = TRUE
+    diag = FALSE
     overlap = 5
-    factor = 100
+    factor = 1e4
     
     system.time(clusterId_jl <- cluster_SpatioTemporal_julia(arr,
         ncell_overlap = overlap, factor = factor, diag = diag))
-    system.time(clusterId_f90 <- cluster_SpatioTemporal(arr, ncell_overlap = overlap, factor = factor)$clusterId)
+    system.time(clusterId_f90 <- cluster_SpatioTemporal(arr, ncell_overlap = overlap, factor = factor, diag = diag))
     
-    r_cluster <- connect_spatial(arr, diag = diag, factor = 100)
+    system.time(r_cluster <- connect_spatial(arr, diag = diag, factor = factor))
+    system.time(clusterId_rjl <- connect_temporal_Rjulia(r_cluster, ncell_overlap = overlap, verbose = TRUE))
+    clusterId_rjl <- connect_temporal_Rfortran(r_cluster, ncell_overlap = overlap, verbose = TRUE)
+    
+    
+    rbenchmark::benchmark(
+        clusterId_rjl <- connect_temporal_Rjulia(r_cluster, ncell_overlap = overlap, verbose = FALSE), 
+        clusterId_jl <- cluster_SpatioTemporal_julia(arr, ncell_overlap = overlap, factor = factor, diag = diag), 
+       replications = 10
+    )
+    
+    
     system.time(clusterId_rjl  <- cluster_SpatioTemporal_R(arr, ncell_overlap = overlap, factor = factor, diag = diag, version = "julia"))
     system.time(clusterId_rf90 <- cluster_SpatioTemporal_R(arr, ncell_overlap = overlap, factor = factor, diag = diag, version = "fortran"))
     
@@ -39,4 +50,4 @@ test_that("julia,R,Fortran: cluster_SpatioTemporal works",
 # 
 # save(arr, file = "debug-cluster_spatial.rda")
 # r_cluster <- cluster_spatial(arr, diag = diag, factor = 100)
-# write_fig(plot.cluster(r_cluster$clusterID, 1:3, main = "cluster_spatial"), "cluster_spatial.pdf")
+write_fig(plot.cluster(clusterId_f90, 1:3, main = "cluster_spatial"), "cluster_spatial.pdf")

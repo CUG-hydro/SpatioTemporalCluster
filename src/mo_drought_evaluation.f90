@@ -128,7 +128,7 @@ end subroutine droughtIndicator
 !  DATE:     developed in Budapest, 10-11.03.2011
 !**********************************************************************
 subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCellInter, thCellClus, factor, &
-  idCluster, nClusters) bind(C, name="clusterevolution_")
+   diag, idCluster, nClusters) bind(C, name="clusterevolution_")
 
   ! use numerical_libraries, only                        : SVIGN
   use mo_sort,          only : sort
@@ -150,6 +150,7 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
   integer(i4),                              intent(in)    :: thCellClus ! treshold  for cluster formation in space
   ! logical    ,                              intent(in)    :: exceeding 
   ! integer(i4), dimension(nrows,ncols,nMonths),intent(out) :: idCluster2 ! drought clusters id, returned for R
+  logical,                                  intent(in)    :: diag       !If TRUE, the diagonal grids are taken as the neighboring grids
   integer(i4), dimension(nrows,ncols,nMonths),intent(out) :: idCluster ! drought clusters id, returned for R
   integer(i4),                                intent(out) :: nClusters
   integer(i4), intent(in)                   :: factor ! max number of clusters per month
@@ -183,11 +184,10 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
         cycle
      end if
      ! two values return (nC and idCluster) and update SMIc
-     call findClusters (cellCoor, thCellClus, t, idCluster(:,:,t), nC(t), nrows, ncols, nCells, SMIc)
+     call findClusters (cellCoor, thCellClus, t, idCluster(:,:,t), nC(t), nrows, ncols, nCells, SMIc, diag)
      !print*, 'Finding clusters time :', t, nC(t)
   end do
   ! print*, 'Clusters in space done ...'
-  !
   ! maximum number of clusters at all time steps
   maxNc = maxval(nC(:))
   nTotal = nMonths*maxNc
@@ -199,7 +199,6 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
   ! NOTE 
   !      e.g. month*factor + running nr.,
   !           5*1000+1 = 5001              => fisrt cluster in 5th month
-  ! 
   do t=1,nMonths
      if (nC(t) == 0) cycle
      do i=1, nC(t)
@@ -579,7 +578,7 @@ end subroutine calSAD
 ! clustering in space
 ! assign a unique running number at time t
 !-------------------------------------------------------
-subroutine findClusters (cellCoor, thCellClus, t,iC,nCluster, nrows, ncols, nCells, SMIc)
+subroutine findClusters (cellCoor, thCellClus, t,iC,nCluster, nrows, ncols, nCells, SMIc, diag)
 
   !use InputOutput,      only : cellCoor, thCellClus, SMIc
   use mo_smi_constants, only : nodata_i4
@@ -595,24 +594,36 @@ subroutine findClusters (cellCoor, thCellClus, t,iC,nCluster, nrows, ncols, nCel
   integer(i4), dimension(:,:,:),              intent(inout) :: SMIc       ! SMI indicator
   integer(i4),                                intent(out)   :: nCluster   !  number of clusters larger than a threshold
   integer(i4), dimension(nrows,ncols),        intent(out)   :: iC
+  logical,                                    intent(in)    :: diag       !If TRUE, the diagonal grids are taken as the neighboring grids
 
   ! local variables
-  integer(i4)                                           :: i, j, k, klu, klu1
-  integer(i4)                                           :: iul, idr, jul, jdr
+  integer(i4)                                           :: i, j, k, klu, klu1, npos, ind
+!   integer(i4)                                           :: iul, idr, jul, jdr
   integer(i4)                                           :: krow, kcol
   integer(i4), dimension(:), allocatable                :: cno, vec
   integer(i4), dimension(:), allocatable                :: nCxCluster
   integer(i4)                                           :: nClusterR, ncc
+  integer(i4), dimension(:,:), allocatable              :: pos
+
   !
+  if(diag) then
+   allocate(pos(8,2))
+   pos = reshape((/1,0,-1,0,1,1,-1,-1, 0,1,0,-1,1,-1,-1,1/),(/8,2/))
+  else
+   allocate(pos(4,2))
+   pos = reshape((/1,0,-1,0, 0,1,0,-1/),(/4,2/))
+  end if
+  npos = size(pos, 1)
+  
   iC = nodata_i4 ! matrix of ClusterNO
   nCluster = 0
   do k = 1, nCells
      krow = cellCoor(k,1)
      kcol = cellCoor(k,2)
-     iul  = max(krow-1,1)
-     idr  = min(krow+1,nrows)
-     jul  = kcol
-     jdr  = min(kcol+1,ncols)
+     !iul  = max(krow-1,1)
+     !idr  = min(krow+1,nrows)
+     !jul  = kcol
+     !jdr  = min(kcol+1,ncols)
      ! SMIc of k
      klu  = SMIc(krow, kcol, t)
      if (klu /= 1) cycle
@@ -620,14 +631,22 @@ subroutine findClusters (cellCoor, thCellClus, t,iC,nCluster, nrows, ncols, nCel
         nCluster=nCluster+1
         iC(krow, kcol) = nCluster
      end if
+     do ind = 1, npos
+      i = krow + pos(ind, 1)
+      j = kcol + pos(ind, 2)
+      if (i > nrows .or. i <= 0 .or. j > ncols .or. j <= 0) cycle
 
-     do j=jul, jdr
-        do i= iul, idr
-           if ( iC(i,j) == nodata_i4 .and. SMIc(i,j,t) == klu ) then
-              iC(i,j) = iC(krow, kcol)
-           end if
-        end do
-     end do
+      if ( iC(i,j) == nodata_i4 .and. SMIc(i,j,t) == klu ) then
+         iC(i,j) = iC(krow, kcol)
+      end if
+   end do
+     !do j=jul, jdr
+     !  do i= iul, idr
+     !      !if ( iC(i,j) == nodata_i4 .and. SMIc(i,j,t) == klu ) then
+     !         !iC(i,j) = iC(krow, kcol)
+     !      end if
+     !   end do
+     !end do
   end do
 
   ! consolidate clusters
@@ -641,24 +660,40 @@ subroutine findClusters (cellCoor, thCellClus, t,iC,nCluster, nrows, ncols, nCel
         krow = cellCoor(k,1)
         kcol = cellCoor(k,2)
         klu  = iC(krow, kcol)
-        iul  = max(krow-1,1)
-        idr  = min(krow+1,nrows)
-        jul  = kcol
-        jdr  = min(kcol+1,ncols)
-        do j=jul, jdr
-           do i= iul, idr
-              klu1 = iC(i, j)
-              ! rm this cluster, if
-              ! what's the purpose?
-              if ( klu  /= nodata_i4 .and. &
-                   klu1 /= nodata_i4 .and. &
-                   klu  /= klu1 ) then
-                 cno(klu1) = -9
-                 nClusterR = nClusterR - 1
-                 where ( iC == klu1 ) iC = klu
-              end if
-           end do
-        end do
+        !iul  = max(krow-1,1)
+        !idr  = min(krow+1,nrows)
+        !jul  = kcol
+        !jdr  = min(kcol+1,ncols)
+        do ind = 1, npos
+         i = krow + pos(ind, 1)
+         j = kcol + pos(ind, 2)
+         if (i > nrows .or. i <= 0 .or. j > ncols .or. j <= 0) cycle
+         klu1 = iC(i, j)
+         ! rm this cluster, if
+         ! what's the purpose?
+         if ( klu  /= nodata_i4 .and. &
+              klu1 /= nodata_i4 .and. &
+              klu  /= klu1 ) then
+               cno(klu1) = -9
+               nClusterR = nClusterR - 1
+               where ( iC == klu1 ) iC = klu
+            end if
+         end do
+
+        !do j=jul, jdr
+        !   do i= iul, idr
+        !      klu1 = iC(i, j)
+        !      ! rm this cluster, if
+        !      ! what's the purpose?
+        !      if ( klu  /= nodata_i4 .and. &
+        !           klu1 /= nodata_i4 .and. &
+        !           klu  /= klu1 ) then
+        !         cno(klu1) = -9
+        !         nClusterR = nClusterR - 1
+        !         where ( iC == klu1 ) iC = klu
+        !      end if
+        !   end do
+        !end do
      end do
      
      ! delete small clusters < thesh. area
