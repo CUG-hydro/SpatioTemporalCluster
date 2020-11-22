@@ -71,7 +71,6 @@ subroutine droughtIndicator( SMI, mask, SMI_thld, &
   ! write (*, "(10F9.2)") SMI
   ! write (*, *) "========================"
   ! write (*, "(10L6)") mask
-
   ! write (*, "(10F9.2)") SMI_thld
 
   if (exceeding) then
@@ -128,7 +127,7 @@ end subroutine droughtIndicator
 !  PURPOSE:  cluster drought clusters in space and time
 !  DATE:     developed in Budapest, 10-11.03.2011
 !**********************************************************************
-subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCellInter, thCellClus, &
+subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCellInter, thCellClus, factor, &
   idCluster, nClusters) bind(C, name="clusterevolution_")
 
   ! use numerical_libraries, only                        : SVIGN
@@ -153,11 +152,11 @@ subroutine ClusterEvolution( SMIc, nrows, ncols, nMonths, nCells, cellCoor, nCel
   ! integer(i4), dimension(nrows,ncols,nMonths),intent(out) :: idCluster2 ! drought clusters id, returned for R
   integer(i4), dimension(nrows,ncols,nMonths),intent(out) :: idCluster ! drought clusters id, returned for R
   integer(i4),                                intent(out) :: nClusters
+  integer(i4), intent(in)                   :: factor ! max number of clusters per month
 
   ! local variables
   integer(i4)                              :: i, j, t
   integer(i4), dimension(:),   allocatable :: nC              ! num of clusters per time step
-  integer(i4), parameter                   :: factor = 100000 ! max number of clusters per month
   integer(i4)                              :: ncInter         ! integer, overlaped grids
   integer(i4), dimension(:,:), allocatable :: cno             ! clusters_num_id [nMonth, nC_j]
   integer(i4), dimension(:),   allocatable :: cnoList
@@ -666,7 +665,8 @@ subroutine findClusters (cellCoor, thCellClus, t,iC,nCluster, nrows, ncols, nCel
      do i=1, nCluster
         if (cno(i) == -9 ) cycle
         ncc = count(iC == cno(i))
-        if ( ncc <= thCellClus ) then
+        ! selected ncells >= thCellClus, kongdd, 20201121
+        if ( ncc < thCellClus ) then
            where (iC == cno(i)) iC = nodata_i4
            cno(i) = -9
            nClusterR = nClusterR -1

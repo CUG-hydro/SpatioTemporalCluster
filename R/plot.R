@@ -1,6 +1,6 @@
 #' Plot drought cluster result
 #' 
-#' @param idClusters obj returned by [ClusterEvolution()]
+#' @param idClusters obj returned by [cluster_SpatioTemporal()]
 #' @param times integer vector, which time to plot?
 #' @param x numeric vector, latitudes
 #' @param y numeric vector, longitudes
@@ -70,7 +70,7 @@ plot.cluster <- function(idClusters, times = 1:4, range = NULL, origin = "1961-0
     df  <- melt(cbind(grid, mat), c("x", "y"), variable.name = "time")
     df$value %<>% factor()
     
-    pos_grid <- c(2, 4, 6, 8)+0.5
+    pos_grid <- seq(2, max(df$y), 2)+0.5
 
     # panel <- function(x, y, z, subscripts, ..., sp.layout) {
     #     # panel.levelplot(x, y, z, subscripts, ...)
@@ -93,17 +93,20 @@ plot.cluster <- function(idClusters, times = 1:4, range = NULL, origin = "1961-0
                 lty = 1
                 lwd = 0.4
                 color = alpha("black", 0.1)
-                # panel.abline(h = pos_grid, col = color, lty = lty, lwd = lwd)
-                # panel.abline(v = pos_grid, col = color, lty = lty, lwd = lwd)
+                panel.abline(h = pos_grid, col = color, lty = lty, lwd = lwd)
+                panel.abline(v = pos_grid, col = color, lty = lty, lwd = lwd)
 
                 panel.levelplot.raster(x, y, z, subscripts, ...)
-                panel.grid()
+                # panel.grid()
                 
                 I <- subscripts[which(!is.na(z[subscripts]))]
                 d_lab <- data.table(x = x[I], y = y[I], labels = z[I])
                 d_lab <- d_lab[, .(x = mid(x), y = mid(y)), labels]
                 labels <- as.character(z[subscripts])
-                panel.text(d_lab$x, d_lab$y, labels = d_lab$labels, ..., cex = 0.5)
+                # panel.text(d_lab$x, d_lab$y, labels = d_lab$labels, ..., cex = 0.5)
+                labels = as.character(z)
+                labels[is.na(z)] = ""
+                panel.text(x[subscripts], y[subscripts], labels[subscripts], cex = 0.7)
                 sppanel(list(sp.layout), panel.number(), first = FALSE)
             })
     p

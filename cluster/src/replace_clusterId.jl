@@ -1,4 +1,4 @@
-function replace_IdCluster!(mat::AbstractArray{T,3}, mask_vec::Array{CartesianIndex{2},1}, 
+function replace_clusterId!(mat::AbstractArray{T,3}, mask_vec::Array{CartesianIndex{2},1}, 
     t::Int, val_org::T, val_new::T) where {T <: Real}
 
     # inds = CartesianIndices(mat)

@@ -15,7 +15,7 @@ end
 # - `1`: cells less than minCells
 # - `NO`: cluster NO, which is great 
 function find_clutser(mat_bool::AbstractArray{Bool,2}, IdCluster, i::Int, j::Int, opt; 
-    miss_val::Int = -999) 
+    miss_val::Int = -999, diag = false) 
 
     if (IdCluster[i, j] != miss_val); return; end    
     if !mat_bool[i, j]  # not urban
@@ -29,21 +29,26 @@ function find_clutser(mat_bool::AbstractArray{Bool,2}, IdCluster, i::Int, j::Int
         IdCluster[i, j] = opt.ID
 
         # search for children
-        pos = [0 -1; 0 1; -1 0; 1 0]
-        # pos = [0 -1; 0 1; 1 0]
+        if diag 
+            pos = [-1 -1; -1 1; 1 -1; 1 1; 0 -1; 0 1; -1 0; 1 0]
+        else
+            pos = [0 -1; 0 1; -1 0; 1 0]
+        end
+        # println(diag, ": ", size(pos)[1])
+
         for k = 1:size(pos)[1]
             i2 = pos[k, 1] + i
             j2 = pos[k, 2] + j
 
             if (i2 > opt.nrow || i2 <= 0 || j2 > opt.ncol || j2 <= 0); continue; end
-            find_clutser(mat_bool, IdCluster, i2, j2, opt)
+            find_clutser(mat_bool, IdCluster, i2, j2, opt, diag = diag)
         end
     end
 end
 
 # only TRUE value will be accounted.
-function spatial_cluster!(mat_bl::AbstractArray{Bool, 2}, IdCluster::AbstractArray{Int, 2};
-    ID0::Int = 0)
+function connect_spatial!(mat_bl::AbstractArray{Bool, 2}, IdCluster::AbstractArray{Int, 2};
+    ID0::Int = 0, diag = false)
 
     nrow, ncol = size(mat_bl)
     # IdCluster = ones(Int, nrow, ncol) .* -999
@@ -55,17 +60,37 @@ function spatial_cluster!(mat_bl::AbstractArray{Bool, 2}, IdCluster::AbstractArr
         iter += 1
         i = ind[1]
         j = ind[2]
-        find_clutser(mat_bl, IdCluster, i, j, opt)
+        find_clutser(mat_bl, IdCluster, i, j, opt, diag = diag)
         # if mod(iter, 10000) == 0; println("($i, $j): $opt"); end
         opt.status_prev = false
     end
     IdCluster
 end
 
+# only TRUE value will be accounted.
+function connect_spatial(mat_bl::AbstractArray{Bool, 2};
+    ID0::Int = 0, diag = false)
+    nrow, ncol = size(mat_bl)
+    IdCluster = ones(Int, nrow, ncol) .* -999
 
-function spatial_cluster(mat_bl::AbstractArray{Bool, 3}; 
-    time_factor::Int = 1000000, 
-    minCells::Int = 25)
+    opt = clusterStatus(false, ID0, nrow, ncol)
+    inds = CartesianIndices(mat_bl)
+    # inds = findall(mat_bl)
+    iter = 0
+    @inbounds for ind = inds
+        iter += 1
+        i = ind[1]
+        j = ind[2]
+        find_clutser(mat_bl, IdCluster, i, j, opt, diag = diag)
+        # if mod(iter, 10000) == 0; println("($i, $j): $opt"); end
+        opt.status_prev = false
+    end
+    IdCluster
+end
+
+function connect_spatial(mat_bl::AbstractArray{Bool, 3}; 
+    factor::Int = 1000000, 
+    minCells::Int = 25, diag = false)
 
     dim = size(mat_bl)
     IdClusters = ones(Int, dim) .* -999
@@ -74,9 +99,9 @@ function spatial_cluster(mat_bl::AbstractArray{Bool, 3};
     cno_list = []
 
     for t in 1:ntime
-        println("t = $t")
+        # println("t = $t")
         cluster = @view(IdClusters[:,:,t])
-        spatial_cluster!(@view(mat_bl[:,:,t]), cluster, ID0 = time_factor*t)
+        connect_spatial!(@view(mat_bl[:,:,t]), cluster, ID0 = factor*t, diag = diag)
         
         # count how many clusters and filter small clusters
         info = countmap(cluster[:]) # filter 
@@ -94,7 +119,7 @@ function spatial_cluster(mat_bl::AbstractArray{Bool, 3};
         nC[t] = length(ids_long)
         # get cno info 
         push!(cno_list, ids_long)
-        # cluster = spatial_cluster!(mat_bl[:,:,t], IdCluster[:,:,t])
+        # cluster = connect_spatial!(mat_bl[:,:,t], IdCluster[:,:,t])
         # IdCluster[:,:,t] = cluster
     end
     cno = list2mat(cno_list)
@@ -119,5 +144,5 @@ function list2mat(list)
 end
 
 
-export spatial_cluster
+export connect_spatial
 

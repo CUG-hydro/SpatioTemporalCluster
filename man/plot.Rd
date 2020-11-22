@@ -14,7 +14,7 @@ plot.cluster(
 )
 }
 \arguments{
-\item{idClusters}{obj returned by \code{\link[=ClusterEvolution]{ClusterEvolution()}}}
+\item{idClusters}{obj returned by \code{\link[=cluster_SpatioTemporal]{cluster_SpatioTemporal()}}}
 
 \item{times}{integer vector, which time to plot?}
 

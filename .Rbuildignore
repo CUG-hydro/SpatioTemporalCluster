@@ -8,3 +8,4 @@
 ^src/mo_weight$
 ^Figures$
 ^data-raw$
+^cluster/OUTPUT$

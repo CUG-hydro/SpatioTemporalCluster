@@ -1,6 +1,6 @@
 Package: SpatioTemporal.cluster
 Type: Package
-Title:SpatioTemporal.cluster
+Title: SpatioTemporal.cluster
 Version: 1.0
 Date: 2019-08-29
 Authors@R: person("Dongdong", "Kong", email = "kongdd.sysu@gmail.com",
@@ -8,14 +8,17 @@ Authors@R: person("Dongdong", "Kong", email = "kongdd.sysu@gmail.com",
 Description: SpatioTemporal cluster.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Imports: Rcpp (>= 1.0.2), 
-    data.table, 
+Imports: 
+    Rcpp (>= 1.0.2),
+    data.table,
     reshape2,
     lattice,
-    scales, 
-    magrittr, 
-    sp, 
-    matrixStats
+    scales,
+    magrittr,
+    sp,
+    matrixStats,
+    JuliaCall,
+    abind
 LinkingTo: Rcpp
 Suggests: 
     testthat (>= 2.1.0),

@@ -53,8 +53,8 @@ HW_cluster <- function(arr, mGridArea, prob, nCellInter){
 
         # TRS = 35
         # 添加中国底图
-        r <- droughtIndicator( mat, mask, SMI_thld = TRS, masked = TRUE)
-        r_cluster <- ClusterEvolution(r$SMIc, r$cellCoor, thCellClus = 16, nCellInter = nCellInter)
+        r <- eventIndicator( mat, mask, SMI_thld = TRS, masked = TRUE)
+        r_cluster <- cluster_SpatioTemporal(r$SMIc, r$cellCoor, thCellClus = 16, nCellInter = nCellInter)
         r_status  <- ClusterStats(mat, mask, SMI_thld = TRS, r_cluster$idCluster, r_cluster$shortCnoList, 
             mGridArea = mGridArea, masked = TRUE)
         

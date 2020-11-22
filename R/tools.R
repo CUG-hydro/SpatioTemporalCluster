@@ -13,4 +13,19 @@ make_clean <- function(load_all = FALSE){
     }
     # if (load_all) devtools::load_all()
 }
-# bsamgp
+
+last <- function(x, len = 1) {
+    n <- length(x)
+    if (len == 1) {
+        x[[n]]
+    } else {
+        x[seq(n - len + 1, n)]
+    }
+}
+
+#' count grids for each cluster
+#' @keywords internal
+#' @export
+cluster_grids <- function(clutserId) {
+    sort(table(clutserId), decreasing = TRUE) %>% as.numeric()
+}
