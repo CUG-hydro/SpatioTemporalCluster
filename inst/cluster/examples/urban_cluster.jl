@@ -1,3 +1,4 @@
+include("main_pkgs.jl")
 year  = 2015
 years = 1980:2015
 nyear = length(years)
@@ -9,11 +10,11 @@ for i = 1:nyear
   file1 = @sprintf("F:/SciData/LULC/LULC_China_landsat_1km/%d/CLUDA_%d_88_1km_prop.tif", year, year)
   file2 = @sprintf("F:/SciData/LULC/LULC_China_landsat_1km/%d/CLUDA_%d_89_1km_prop.tif", year, year)
 
-  file1 = @sprintf("/mnt/f/SciData/LULC/LULC_China_landsat_1km/%d/CLUDA_%d_88_1km_prop.tif", year, year)
-  file2 = @sprintf("/mnt/f/SciData/LULC/LULC_China_landsat_1km/%d/CLUDA_%d_89_1km_prop.tif", year, year)
+  # file1 = @sprintf("/mnt/f/SciData/LULC/LULC_China_landsat_1km/%d/CLUDA_%d_88_1km_prop.tif", year, year)
+  # file2 = @sprintf("/mnt/f/SciData/LULC/LULC_China_landsat_1km/%d/CLUDA_%d_89_1km_prop.tif", year, year)
 
   r1 = GeoArrays.read(file1)
-  r2 = GeoArrays.read(file1)
+  r2 = GeoArrays.read(file2)
   r = r1+r2
   arr_urban_perc[:, :, i] = r.A
 end

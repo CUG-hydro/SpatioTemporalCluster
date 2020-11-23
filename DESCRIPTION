@@ -1,7 +1,7 @@
 Package: SpatioTemporal.cluster
 Type: Package
 Title: SpatioTemporal.cluster
-Version: 1.0
+Version: 1.0.1
 Date: 2019-08-29
 Authors@R: person("Dongdong", "Kong", email = "kongdd.sysu@gmail.com",
   role = c("aut", "cre"))

@@ -9,3 +9,4 @@
 ^Figures$
 ^data-raw$
 ^cluster/OUTPUT$
+^inst/cluster/OUTPUT$

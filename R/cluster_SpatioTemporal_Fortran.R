@@ -83,7 +83,7 @@ eventIndicator <- function(arr, threshold, mask = NULL, exceeding = TRUE, masked
 #' 
 #' @param arr integer array, `[nrow, ncol, ntime]`, returned by [eventIndicator()]
 #' @param cellCoor integer matrix, `[nCells, 2]`
-#' @param ncell_connected treshold  for cluster formation in space
+#' @param ncell_connect treshold  for cluster formation in space
 #' @param ncell_overlap number cells for joining clusters in time
 #' @param factor max number of clusters per time
 #' 
@@ -96,7 +96,7 @@ eventIndicator <- function(arr, threshold, mask = NULL, exceeding = TRUE, masked
 #' @export
 cluster_SpatioTemporal <- function(
     arr, cellCoor = NULL, 
-    ncell_connected = 1L, ncell_overlap = 1L, factor = 1e4, diag = FALSE)
+    ncell_connect = 1L, ncell_overlap = 1L, factor = 1e4, diag = FALSE)
 {
     dim   <- dim(arr) 
     nrows <- dim[1]
@@ -113,7 +113,7 @@ cluster_SpatioTemporal <- function(
     nCluster  = 0L
     r <- .Fortran("ClusterEvolution", 
                   arr, nrows, ncols, ntime, nCells, cellCoor, 
-                  as.integer(ncell_overlap), as.integer(ncell_connected), as.integer(factor), diag,
+                  as.integer(ncell_overlap), as.integer(ncell_connect), as.integer(factor), diag,
                   clusterId, nCluster)
     r <- set_names(last(r, 2), c("clusterId", "nCluster"))
     r$clusterId[r$clusterId == -9999L] = NA_integer_

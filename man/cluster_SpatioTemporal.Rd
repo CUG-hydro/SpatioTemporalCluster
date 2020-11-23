@@ -10,7 +10,7 @@
 cluster_SpatioTemporal(
   arr,
   cellCoor = NULL,
-  ncell_connected = 1L,
+  ncell_connect = 1L,
   ncell_overlap = 1L,
   factor = 10000,
   diag = FALSE
@@ -18,7 +18,8 @@ cluster_SpatioTemporal(
 
 cluster_SpatioTemporal_julia(
   arr,
-  ncell_connected = 1L,
+  method = "tree",
+  ncell_connect = 1L,
   ncell_overlap = 5L,
   factor = 10000,
   diag = FALSE,
@@ -27,7 +28,7 @@ cluster_SpatioTemporal_julia(
 
 cluster_SpatioTemporal_R(
   arr,
-  ncell_connected = 1L,
+  ncell_connect = 1L,
   ncell_overlap = 5L,
   factor = 10000,
   diag = FALSE,
@@ -41,13 +42,16 @@ cluster_SpatioTemporal_R(
 
 \item{cellCoor}{integer matrix, \verb{[nCells, 2]}}
 
-\item{ncell_connected}{treshold  for cluster formation in space}
+\item{ncell_connect}{treshold  for cluster formation in space}
 
 \item{ncell_overlap}{number cells for joining clusters in time}
 
 \item{factor}{max number of clusters per time}
 
-\item{version}{character, "julia" or fortran}
+\item{method}{one of "tree", "recursive" and "low". "tree" is the default and
+the fastest. The second fastest is "recursive".}
+
+\item{version}{\code{connect_temporal} version in R language, one of "julia" or fortran}
 }
 \description{
 cluster drought clusters in space and time

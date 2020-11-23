@@ -1,41 +1,24 @@
+library(SpatioTemporal.cluster)
 
+ndim <- 10
+ntime = 4
+arr <- array(data = ifelse(sample(1:100, 20^2*20, T) > 50, T, F), c(ndim, ndim, ntime))
+z1 <- cluster_SpatioTemporal(arr, ncell_connect = 5, ncell_overlap = 5, factor = 100)
 
-{
-    overlap = 5
-    ## action now
-    # arr = arr[,,1:3]
-    verbose = FALSE
-    diag = FALSE
-    # diag = TRUE
-    
-    # clusterId = r_cluster$clusterID
-    # system.time()
-    
-    factor = 1e3
-    system.time(clusterId_jl <- cluster_SpatioTemporal_julia(arr, ncell_overlap = overlap, 
-                                                             diag = diag, factor = factor))
-    system.time(clusterId_f90 <- cluster_SpatioTemporal(arr, ncell_overlap = overlap, factor = factor)$clusterId)
-    
-    # microbenchmark::microbenchmark(
-    rbenchmark::benchmark(
-        clusterId_jl <- cluster_SpatioTemporal_julia(arr, ncell_overlap = overlap, 
-                                                     diag = diag, factor = 1000),
-        clusterId_f90 <- cluster_SpatioTemporal(arr, ncell_overlap = overlap, factor = 1000)$clusterId,
-        replications = 10
-    )
-    
-    # clusterId_rf90 = connect_temporal_Rfortran(r_cluster, overlap = overlap, verbose = verbose)
-    # clusterId_f90 = cluster_SpatioTemporal(arr[,,1:3], ncell_overlap = overlap, factor = 100)$clusterId
-    
-    # all.equal(cluster_grids(clusterId_rf90), cluster_grids(clusterId_f90))
-    # all.equal(cluster_grids(clusterId_rf90), cluster_grids(clusterId_rjl))
-    # all.equal(cluster_grids(clusterId_f90), cluster_grids(clusterId_rjl))
-    all.equal(cluster_grids(clusterId_jl), cluster_grids(clusterId_f90))
-}
+z2 <- cluster_SpatioTemporal_julia(arr, method = 'tree', ncell_connect = 5, ncell_overlap = 5)
+z3 <- cluster_SpatioTemporal_julia(arr, method = 'recursive', ncell_connect = 5, ncell_overlap = 5)
+z4 <- cluster_SpatioTemporal_julia(arr, method = 'low', ncell_connect = 5, ncell_overlap = 5)
 
-plot.cluster(clusterId_rjl, main = "R")
-plot.cluster(clusterId_jl, main = "julia")
+z5 <- cluster_SpatioTemporal_R(arr, version = 'julia', ncell_connect = 5, ncell_overlap = 5, factor = 100)
+z6 <- cluster_SpatioTemporal_R(arr, version = 'fortran', ncell_connect = 5, ncell_overlap = 5, factor = 100)
 
-x = connect_spatial_julia(arr[,,], factor = 100, diag = TRUE)
-plot.cluster(x[[3]], main = "connect_spatial_julia")
-plot.cluster(clusterId, main = "clusterId")
+# cluster_grids(z6)
+all.equal(cluster_grids(z2), cluster_grids(z3))
+all.equal(cluster_grids(z2), cluster_grids(z4))
+all.equal(cluster_grids(z2), cluster_grids(z1))
+all.equal(cluster_grids(z5), cluster_grids(z6))
+
+all.equal(cluster_grids(z1), cluster_grids(z5))
+
+# write_fig(plot.cluster(z1, main = "Fortran"), "Fortran.pdf")
+# write_fig(plot.cluster(z5, main = "Rjulia"), "RJulia.pdf")

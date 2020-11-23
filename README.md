@@ -17,8 +17,13 @@ The goal of SMI is to …
 
 ## Installation
 
-You can install the released version of SMI from
-[CRAN](https://CRAN.R-project.org) with:
+### 安装Julia
+
+  - Install Julia (\>=1.5.3)
+  - Install `StatsBase`, `RCall` package
+  - In Julia, `build RCall`, ensure `using RCall` works
+
+### 安装SpatioTemporal.cluster
 
 ``` r
 devtools::install_github("kongdd/SpatioTemporal.cluster")
@@ -26,11 +31,12 @@ devtools::install_github("kongdd/SpatioTemporal.cluster")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+推荐使用julia版本的`cluster_SpatioTemporal`，且设置`method = "tree"`，此版本下速度最快
 
 ``` r
 library(SpatioTemporal.cluster)
-## basic example code
+clusterIds <- cluster_SpatioTemporal_julia(arr, method = "tree",
+    ncell_connected = 1L, ncell_overlap = 5L, factor = 1e4, diag = FALSE) 
 ```
 
 ## References
