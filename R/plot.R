@@ -11,6 +11,7 @@
 #' @import lattice sp
 #' 
 #' @rdname plot
+#' @export 
 plot.cluster <- function(idClusters, times = 1:4, range = NULL, origin = "1961-01-01", 
     ..., sp.layout = NULL)
 {

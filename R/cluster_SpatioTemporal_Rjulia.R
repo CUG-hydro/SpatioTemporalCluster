@@ -2,9 +2,10 @@ env <- list2env(list(.julia = FALSE))
 
 julia_setup <- function() {
     JuliaCall::julia_setup()
-    infile <- system.file("cluster/src/cluster.jl", package = "SpatioTemporal.cluster")
+    # infile <- system.file("cluster/src/cluster.jl", package = "SpatioTemporal.cluster")
     # print(infile)
-    JuliaCall::julia_source(infile)
+    JuliaCall::julia_library("SpatioTemporalCluster")
+    # JuliaCall::julia_source(infile)
 }
 
 #' @importFrom JuliaCall julia_setup julia_source julia_call
@@ -16,7 +17,7 @@ julia_init <- function() {
 }
 
 connect_spatial_julia <- function(arr, ncell_connect = 1L, factor = 1e4, diag = FALSE) {
-    ans = julia_call("cluster.connect_spatial", arr,
+    ans = julia_call("connect_spatial", arr,
         factor = as.integer(factor), # max clusters for each time
         minCells = as.integer(ncell_connect),
         diag = diag
@@ -35,7 +36,7 @@ cluster_SpatioTemporal_julia <- function(arr, method = "tree",
     ncell_connect = 1L, ncell_overlap = 5L, factor = 1e4, diag = FALSE, ...) 
 {
     julia_init()
-    clusterId = julia_call("cluster.cluster_SpatioTemporal", arr,
+    clusterId = julia_call("cluster_SpatioTemporal", arr,
         method = "tree",
         ncell_connect = as.integer(ncell_connect),
         ncell_overlap = as.integer(ncell_overlap),
