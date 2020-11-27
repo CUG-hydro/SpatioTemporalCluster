@@ -22,38 +22,124 @@ rev_rows <- function(mat) {
 #' clusters identified by the function spatial_cluster_Fortran.
 #' The original codes are sourced from Fortran language and written by
 #' Samaniego et al., nature climate change, 2018.
+#' @importFrom Ipaper fprintf
 #' @export
-connect_temporal_Rfortran <- function(r_cluster, ncell_overlap = 5, factor = 10000, 
-    verbose = FALSE)
+# connect_temporal_Rfortran <- function(r_cluster, ncell_overlap = 5, factor = 10000,
+#     verbose = FALSE)
+# {
+#     clusterID <- r_cluster$clusterID
+#     cno       <- r_cluster$cno
+#     ncluster  <- r_cluster$ncluster
+# #########From first time to end time and from top to bottom#########
+#     k <- 0
+#     for (t in 2:dim(clusterID)[3]) {
+#       if (ncluster[t] < 1) next
+#       for (i in 1:ncluster[t]) {
+#             if (is.na(cno[t, i])) next
+#             if (ncluster[t-1] < 1) next
+#             for (j in 1:ncluster[t-1]) {
+#               if (is.na(cno[t-1, j])) next
+#               id.now = cno[t, i]
+#               id.pre = cno[t - 1, j]
+#               if (id.now == id.pre) next
+#               ncInter <- sum(clusterID[,,t] == id.now & clusterID[,,t-1] == id.pre,
+#                                na.rm = TRUE)
+#               if (ncInter >= ncell_overlap){
+#                 clusterID[,,1:t][clusterID[,,1:t] == id.pre] <- id.now
+#                 cno[1:t, ][cno[1:t, ] == id.pre] <- id.now
+#                 k = k + 1
+#                 if (verbose) fprintf("First:[k = %d, t=%d] %d -> %d\n", k, t, id.pre, id.now)
+#                 # print(check(clusterID) %>% tail())
+#               }
+# 
+#             }
+#         }
+#     }
+#     #########From end time to first time and from bottom to top#########
+#     k <- 0
+#     for (t in dim(clusterID)[3]:2){
+#       if (ncluster[t-1] < 1) next
+#       for (i in ncluster[t-1]:1){
+#         if (is.na(cno[t-1, i])) next
+#         if (ncluster[t] < 1) next
+#         for (j in ncluster[t]:1){
+#           if (is.na(cno[t, j])) next
+#           id.now <- cno[t, j]
+#           id.pre <- cno[t-1, i]
+#           if (id.pre == id.now) next
+#           ncInter <- sum(clusterID[,,t] == id.now & clusterID[,,t-1] == id.pre,
+#                          na.rm = TRUE)
+#           if (ncInter >= ncell_overlap){
+#             clusterID[clusterID == id.now] <- id.pre
+#             cno[cno == id.now] <- id.pre
+#             k = k + 1
+#             if (verbose) fprintf("Second:[k = %d, t=%d] %d -> %d\n", k, t, id.now, id.pre)
+#           }
+#         }
+#       }
+#     }
+#     return(clusterID)
+# }
+
+
+
+connect_temporal_Rfortran <- function(r_cluster, ncell_overlap = 5, factor = 10000,
+                                      verbose = FALSE)
 {
-    clusterID = r_cluster$clusterID
-    cno       = r_cluster$cno
-    ncluster  = r_cluster$ncluster
-
-    k = 0
-    for (t in 2:dim(clusterID)[3]) {
-        for (i in 1:ncluster[t]) {
-            if (is.na(cno[t, i])) next
-            for (j in 1:ncluster[t-1]) {
-                if (is.na(cno[t-1, j])) next
-                ncInter <- sum(clusterID[,,t] == cno[t, i] & clusterID[,,t-1] == cno[t-1, j],
-                               na.rm = TRUE)
-                if (ncInter >= ncell_overlap){
-                    id.now = cno[t, i]
-                    id.pre = cno[t - 1, j]
-                    if (id.now == id.pre) next()
-
-                    clusterID[,,1:t][clusterID[,,1:t] == cno[t-1, j]] <- cno[t, i]
-                    cno[1:t, ][cno[1:t, ] == cno[t-1, j]] <- cno[t, i] 
-
-                    k = k + 1
-                    if (verbose) fprintf("[k = %d, t=%d] %d -> %d\n", k, t, id.pre, id.now)
-                    # print(check(clusterID) %>% tail())
-                }
-            }
+  clusterID <- r_cluster$clusterID
+  cno       <- r_cluster$cno
+  ncluster  <- r_cluster$ncluster
+  #########From first time to end time and from top to bottom#########
+  k <- 0
+  for (t in 2:dim(clusterID)[3]) {
+    while(t >= 2){
+      if (ncluster[t] < 1) next
+      for (i in 1:ncluster[t]) {
+        if (is.na(cno[t, i])) next
+        if (ncluster[t-1] < 1) next
+        for (j in 1:ncluster[t-1]) {
+          if (is.na(cno[t-1, j])) next
+          id.now = cno[t, i]
+          id.pre = cno[t - 1, j]
+          if (id.now == id.pre) next
+          ncInter <- sum(clusterID[,,t] == id.now & clusterID[,,t-1] == id.pre,
+                         na.rm = TRUE)
+          if (ncInter >= ncell_overlap){
+            clusterID[clusterID == id.pre] <- id.now
+            cno[cno == id.pre] <- id.now
+            k = k + 1
+            if (verbose) fprintf("First:[k = %d, t=%d] %d -> %d\n", k, t, id.pre, id.now)
+            # print(check(clusterID) %>% tail())
+          }
         }
+      }
+      t <- t - 1
     }
-    return(clusterID)
+  }
+  # #########From end time to first time and from bottom to top#########
+  # k <- 0
+  # for (t in dim(clusterID)[3]:2){
+  #   if (ncluster[t-1] < 1) next
+  #   for (i in ncluster[t-1]:1){
+  #     if (is.na(cno[t-1, i])) next
+  #     if (ncluster[t] < 1) next
+  #     for (j in ncluster[t]:1){
+  #       if (is.na(cno[t, j])) next
+  #       id.now <- cno[t, j]
+  #       id.pre <- cno[t-1, i]
+  #       if (id.pre == id.now) next
+  #       ncInter <- sum(clusterID[,,t] == id.now & clusterID[,,t-1] == id.pre,
+  #                      na.rm = TRUE)
+  #       if (ncInter >= ncell_overlap){
+  #         clusterID[clusterID == id.now] <- id.pre
+  #         cno[cno == id.now] <- id.pre
+  #         k = k + 1
+  #         if (verbose) fprintf("Second:[k = %d, t=%d] %d -> %d\n", k, t, id.now, id.pre)
+  #       }
+  #     }
+  #   }
+  # }
+  return(clusterID)
 }
 
 

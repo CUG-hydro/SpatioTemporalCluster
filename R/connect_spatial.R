@@ -113,12 +113,12 @@ connect_spatial_matrix <- function(matrix, ncell_connect = 1L, diag = FALSE,
         names <- names(areas)
         clusterID[clusterID %in% as.numeric(names[areas < ncell_connect])] <- NA
         ##################reorder clusters######################################
-        names <- as.numeric(names[areas >= ncell_connect])
-        if (length(names) > 0){
-            for (ind in 1:length(names)){
-                clusterID[clusterID == names[ind]] <- ind
-            }
-        }
+        # names <- as.numeric(names[areas >= ncell_connect])
+        # if (length(names) > 0){
+        #     for (ind in 1:length(names)){
+        #         clusterID[clusterID == names[ind]] <- ind
+        #     }
+        # }
     }
     return(clusterID)
 }

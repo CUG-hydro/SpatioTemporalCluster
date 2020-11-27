@@ -2,6 +2,7 @@
 #' 
 #' @param clusterId 3d array
 #' @keywords internal
+#' @importFrom Ipaper listk
 #' @export 
 clusterID_refactor <- function(clusterID, factor = 10000) {
     # clusterID <- sapply(clusterID, c)
@@ -18,8 +19,8 @@ clusterID_refactor <- function(clusterID, factor = 10000) {
     mask <- which(mask > 0)
 
     cno <- matrix(NA, nrow = ntime, ncol = max(ncluster, na.rm = T))
-    # browser()
     for (i in 1:ntime) {
+        if (ncluster[i] < 1) next
         for (j in 1:ncluster[i]) {
             id = i * factor + j
             cno[i, j] <- id
