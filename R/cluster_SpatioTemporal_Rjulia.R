@@ -45,17 +45,56 @@ cluster_SpatioTemporal_julia <- function(arr, method = "tree",
     clusterId
 }
 
-#' @rdname cluster_SpatioTemporal
-#' @param version `connect_temporal` version in R language, one of "julia" or fortran
-#' @export
-cluster_SpatioTemporal_R <- function(
-    arr, ncell_connect = 1L, ncell_overlap = 5L, factor = 1e4, diag = FALSE, 
-    verbose = FALSE, version = c("julia", "fortran"), ...) 
-{
-    r_cluster <- connect_spatial(arr, ncell_connect = ncell_connect, factor = factor, diag = diag)
-    FUN <- switch(version[1],
-        "julia" = connect_temporal_Rjulia,
-        "fortran" = connect_temporal_Rfortran
+#' @title Find spatiotemporal connected clusters in a three-dimensional array
+#' @description Connect clusters in space and time
+#' @param arr a three-dimensional array including only TRUE and FALSE.
+#' @param ncell_connect a integer. If a cluster with number of grids is no more
+#' than this threshold, this cluster will be excluded.
+#' @param ncell_overlap a integer. If the share grids of the two clusters in two
+#' consecutive layers are no less than the overlap, the two clusters will be
+#' taken as the same one.
+#' @param factor a integer that is used to recode cluster encoding.
+#' @param diag a logical value. If TRUE, the diagonal grids are taken as
+#' the adjacent congeneric grids.
+#' @param nodes a integer. The number of cluster will be opened for parallel
+#' calculation.
+#' @param verbose a logical value. If TRUE, the cluster translation process will
+#' be printed.
+#' @importFrom plyr llply
+#' @importFrom parallel makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
+#' @import foreach
+cluster_SpatioTemporal_R <- function(arr, ncell_connect = 1, ncell_overlap = 5,
+                                     factor = 10000, diag = FALSE, nodes = 16,
+                                     verbose = TRUE) {
+    dims <- dim(arr)
+    arr <- llply(1:dims[3], function(ind) arr[, , ind])
+    initCluster(ncluster = nodes)
+    clusterID <- foreach(
+        matrix = arr, .combine = cbind,
+        .packages = c("progress"),
+        .export = c(
+            "ncell_connect", "diag",
+            "connect_spatial_forward",
+            "connect_spatial_backward",
+            "connect_spatial_Fortran"
+        )
+    ) %dopar% {
+        c(connect_spatial_Fortran(
+            matrix = matrix,
+            ncell_connect = ncell_connect,
+            diag = diag
+        ))
+    }
+
+    stopCluster(cl)
+    rm(arr)
+    gc()
+    r.cluster <- clusterID_recode(clusterID = clusterID, factor = factor)
+    clusterID <- connect_temporal(
+        r.cluster = r.cluster, verbose = verbose,
+        ncell_overlap = ncell_overlap
     )
-    FUN(r_cluster, ncell_overlap = ncell_overlap, verbose = verbose)
+    clusterID <- array(clusterID, dim = dims)
+    return(clusterID)
 }

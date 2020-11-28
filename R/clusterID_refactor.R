@@ -30,3 +30,35 @@ clusterID_refactor <- function(clusterID, factor = 10000) {
     dim(clusterID) <- dim
     listk(clusterID, cno, ncluster)
 }
+#' @title Recode encodings of clusters
+#' @description Recode encodings of clusters by a factor
+#' @param clusterID a ngrid x ntime matrix. The clusters in this matrix have
+#' been found by the function connect_spatial_Fortran.
+#' @param factor a integer that is used to recode cluster encoding.
+#' @return a list including clusterID, cno, ncluster, and mask:
+#' \describe{
+#' \item{clusterID}{the same as para clusterID but recoded}
+#' \item{cno}{a ntime x ncluster matrix with cluster encodings}
+#' \item{ncluster}{a vector with the number of clusters in each time}
+#' \item{mask}{a vector to show which grids have clusters}
+#' }
+#' @export
+clusterID_recode <- function(clusterID, factor = 10000) {
+    dims <- dim(clusterID)
+    mask <- apply(clusterID, 1, function(x) sum(!is.na(x)))
+    mask <- which(mask > 0)
+    initID <- apply(clusterID, 2, function(x) names(table(x)))
+    ncluster <- sapply(initID, length)
+    cno <- matrix(NA, nrow = dims[2], ncol = max(ncluster, na.rm = T))
+    if (max(ncluster, na.rm = T) > factor) {
+        stop("The number of clusters is more than the factor")
+    }
+    for (i in 1:dims[2]) {
+        if (ncluster[i] < 1) next
+        for (j in 1:ncluster[i]) {
+            cno[i, j] <- i * factor + j
+            clusterID[mask, i][clusterID[mask, i] == initID[[i]][j]] <- cno[i, j]
+        }
+    }
+    return(list(clusterID = clusterID, cno = cno, ncluster = ncluster, mask = mask))
+}
