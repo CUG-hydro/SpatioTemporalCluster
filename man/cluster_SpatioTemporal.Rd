@@ -4,7 +4,6 @@
 \name{cluster_SpatioTemporal}
 \alias{cluster_SpatioTemporal}
 \alias{cluster_SpatioTemporal_julia}
-\alias{cluster_SpatioTemporal_R}
 \title{cluster_SpatioTemporal}
 \usage{
 cluster_SpatioTemporal(
@@ -25,17 +24,6 @@ cluster_SpatioTemporal_julia(
   diag = FALSE,
   ...
 )
-
-cluster_SpatioTemporal_R(
-  arr,
-  ncell_connect = 1L,
-  ncell_overlap = 5L,
-  factor = 10000,
-  diag = FALSE,
-  verbose = FALSE,
-  version = c("julia", "fortran"),
-  ...
-)
 }
 \arguments{
 \item{arr}{integer array, \verb{[nrow, ncol, ntime]}, returned by \code{\link[=eventIndicator]{eventIndicator()}}}
@@ -50,8 +38,6 @@ cluster_SpatioTemporal_R(
 
 \item{method}{one of "tree", "recursive" and "low". "tree" is the default and
 the fastest. The second fastest is "recursive".}
-
-\item{version}{\code{connect_temporal} version in R language, one of "julia" or fortran}
 }
 \description{
 cluster drought clusters in space and time
@@ -69,7 +55,7 @@ threshold = 0.2
 arr <- array(rnorm(nlon*nlat*ntime), dim = c(nlon, nlat, ntime)) > 0.2 # boolean arr
 # mask = apply_3d(arr >= 0.2, FUN = rowSums2) > 0
 # r  <- droughtIndicator( arr, mask, threshold = 0.2)
-r_cluster <- cluster_SpatioTemporal(arr, ncell_connected = 1, ncell_overlap = 1, factor = 1000)
+r_cluster <- cluster_SpatioTemporal(arr, ncell_connect = 1, ncell_overlap = 1, factor = 1000)
 # plot.cluster(r_cluster$clusterId)
 # r_status  <- ClusterStats(mat, mask, SMI_thld, r_cluster$clusterId, r_cluster$shortCnoList)
 }

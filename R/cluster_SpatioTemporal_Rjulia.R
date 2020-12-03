@@ -61,41 +61,40 @@ cluster_SpatioTemporal_julia <- function(arr, method = "tree",
 #' calculation.
 #' @param verbose a logical value. If TRUE, the cluster translation process will
 #' be printed.
-#' @importFrom plyr llply
 #' @importFrom parallel makeCluster stopCluster
 #' @importFrom doParallel registerDoParallel
 #' @import foreach
-cluster_SpatioTemporal_R <- function(arr, ncell_connect = 1, ncell_overlap = 5,
-                                     factor = 10000, diag = FALSE, nodes = 16,
-                                     verbose = TRUE) {
+#' @export 
+cluster_SpatioTemporal_R <- function(arr, ncell_connect = 1, ncell_overlap = 5, 
+    factor = 10000, diag = FALSE, 
+    verbose = TRUE, version = c("julia", "fortran"), 
+    .parallel = FALSE, nodes = 16, ...) 
+{
     dims <- dim(arr)
-    arr <- llply(1:dims[3], function(ind) arr[, , ind])
-    initCluster(ncluster = nodes)
-    clusterID <- foreach(
-        matrix = arr, .combine = cbind,
+    arr <- lapply(1:dims[3], function(ind) arr[, , ind])
+    if (.parallel) InitCluster(ncluster = nodes)
+
+    doFUN <- ifelse(.parallel, `%dopar%`, `%do%`)
+    clusterID <- doFUN(foreach(matrix = arr, .combine = cbind,
         .packages = c("progress"),
-        .export = c(
-            "ncell_connect", "diag",
-            "connect_spatial_forward",
-            "connect_spatial_backward",
-            "connect_spatial_Fortran"
-        )
-    ) %dopar% {
-        c(connect_spatial_Fortran(
+        .export = c("ncell_connect", "diag",
+            "connect_spatial_forward", "connect_spatial_backward", "connect_spatial_Fortran")), {
+        c(connect_spatial_Rfortran(
             matrix = matrix,
             ncell_connect = ncell_connect,
-            diag = diag
-        ))
-    }
+            diag = diag))
+    })
 
-    stopCluster(cl)
-    rm(arr)
-    gc()
-    r.cluster <- clusterID_recode(clusterID = clusterID, factor = factor)
-    clusterID <- connect_temporal(
-        r.cluster = r.cluster, verbose = verbose,
-        ncell_overlap = ncell_overlap
-    )
+    if (.parallel) {
+        stopCluster(cl); gc()
+        rm(arr)
+    }
+    
+    FUN <- switch(version[1],
+        "julia" = connect_temporal_Rjulia,
+        "fortran" = connect_temporal_Rfortran)
+    r_cluster <- clusterID_recode(clusterID = clusterID, factor = factor)
+    clusterID <- FUN(r_cluster = r_cluster, verbose = verbose, ncell_overlap = ncell_overlap)
     clusterID <- array(clusterID, dim = dims)
     return(clusterID)
 }

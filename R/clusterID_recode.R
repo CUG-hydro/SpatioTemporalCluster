@@ -1,35 +1,3 @@
-#' clusterID_refactor
-#' 
-#' @param clusterId 3d array
-#' @keywords internal
-#' @importFrom Ipaper listk
-#' @export 
-clusterID_refactor <- function(clusterID, factor = 10000) {
-    # clusterID <- sapply(clusterID, c)
-    
-    dim = dim(clusterID)
-    ntime <- last(dim)
-    dim2 = c(prod(dim[1:2]), dim[3])
-    dim(clusterID) <- dim2
-
-    initID <- plyr::alply(clusterID, 2, function(x) names(table(x)))
-    ncluster <- sapply(initID, length)
-
-    mask <- apply(clusterID, 1, function(x) sum(!is.na(x)))
-    mask <- which(mask > 0)
-
-    cno <- matrix(NA, nrow = ntime, ncol = max(ncluster, na.rm = T))
-    for (i in 1:ntime) {
-        if (ncluster[i] < 1) next
-        for (j in 1:ncluster[i]) {
-            id = i * factor + j
-            cno[i, j] <- id
-            clusterID[mask, i][clusterID[mask, i] == initID[[i]][j]] <- id
-        }
-    }
-    dim(clusterID) <- dim
-    listk(clusterID, cno, ncluster)
-}
 #' @title Recode encodings of clusters
 #' @description Recode encodings of clusters by a factor
 #' @param clusterID a ngrid x ntime matrix. The clusters in this matrix have
@@ -42,6 +10,7 @@ clusterID_refactor <- function(clusterID, factor = 10000) {
 #' \item{ncluster}{a vector with the number of clusters in each time}
 #' \item{mask}{a vector to show which grids have clusters}
 #' }
+#' @keywords internal
 #' @export
 clusterID_recode <- function(clusterID, factor = 10000) {
     dims <- dim(clusterID)
@@ -60,5 +29,31 @@ clusterID_recode <- function(clusterID, factor = 10000) {
             clusterID[mask, i][clusterID[mask, i] == initID[[i]][j]] <- cno[i, j]
         }
     }
-    return(list(clusterID = clusterID, cno = cno, ncluster = ncluster, mask = mask))
+    listk(clusterID, cno, ncluster, mask)
 }
+
+# clusterID_recode <- function(clusterID, factor = 10000) {
+#     # clusterID <- sapply(clusterID, c)
+#     dim = dim(clusterID)
+#     ntime <- last(dim)
+#     dim2 = c(prod(dim[1:2]), dim[3])
+#     dim(clusterID) <- dim2
+
+#     initID <- plyr::alply(clusterID, 2, function(x) names(table(x)))
+#     ncluster <- sapply(initID, length)
+
+#     mask <- apply(clusterID, 1, function(x) sum(!is.na(x)))
+#     mask <- which(mask > 0)
+
+#     cno <- matrix(NA, nrow = ntime, ncol = max(ncluster, na.rm = T))
+#     for (i in 1:ntime) {
+#         if (ncluster[i] < 1) next
+#         for (j in 1:ncluster[i]) {
+#             id = i * factor + j
+#             cno[i, j] <- id
+#             clusterID[mask, i][clusterID[mask, i] == initID[[i]][j]] <- id
+#         }
+#     }
+#     dim(clusterID) <- dim
+#     listk(clusterID, cno, ncluster)
+# }

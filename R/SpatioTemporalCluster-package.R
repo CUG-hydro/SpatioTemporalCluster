@@ -5,7 +5,7 @@
 # roxygen namespace tags. Modify with care!
 ## usethis namespace: start
 ## usethis namespace: end
-#' @useDynLib SpatioTemporal.cluster, .registration = TRUE
+#' @useDynLib SpatioTemporalCluster, .registration = TRUE
 NULL
 
 # .onLoad <- function (libname, pkgname){ 

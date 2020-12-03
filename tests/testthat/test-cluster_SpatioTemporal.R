@@ -1,6 +1,4 @@
-
-
-test_that("julia,R,Fortran: cluster_SpatioTemporal works",
+test_that("cluster_SpatioTemporal in julia,R,Fortran works",
 {
     set.seed(100)
     n <- 10
@@ -17,9 +15,7 @@ test_that("julia,R,Fortran: cluster_SpatioTemporal works",
     ncell_connect = 5
     ncell_overlap = 5
     
-    system.time(clusterId_jl <- cluster_SpatioTemporal_julia(arr, method = "tree",
-        ncell_connect, ncell_overlap, factor, diag))
-    v_jl   = cluster_grids(clusterId_jl)
+    
     # write_fig(plot.cluster(clusterId_jl, 1:3, main = "Julia"), "julia.pdf")
     system.time(clusterId_f90 <- cluster_SpatioTemporal(arr, NULL, ncell_connect, ncell_overlap, factor, diag))
     
@@ -31,12 +27,13 @@ test_that("julia,R,Fortran: cluster_SpatioTemporal works",
     #     clusterId_jl <- cluster_SpatioTemporal_julia(arr, ncell_overlap = overlap, factor = factor, diag = diag), 
     #    replications = 10
     # )
-    system.time(clusterId_rjl <- cluster_SpatioTemporal_R(arr, ncell_connect, ncell_overlap, factor, diag, version = "julia"))
+    system.time(clusterId_rjl  <- cluster_SpatioTemporal_R(arr, ncell_connect, ncell_overlap, factor, diag, version = "julia"))
     system.time(clusterId_rf90 <- cluster_SpatioTemporal_R(arr, ncell_connect, ncell_overlap, factor, diag, version = "fortran"))
+    system.time(clusterId_jl <- cluster_SpatioTemporal_julia(arr, method = "tree",
+                                                             ncell_connect, ncell_overlap, factor, diag))
     
     v_jl   = cluster_grids(clusterId_jl)
     v_f90  = cluster_grids(clusterId_f90)
-    
     v_rjl  = cluster_grids(clusterId_rjl)
     v_rf90 = cluster_grids(clusterId_rf90)
     

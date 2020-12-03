@@ -1,4 +1,4 @@
 library(testthat)
-library(heatwave)
+library(SpatioTemporalCluster)
 
-test_check("heatwave")
+test_check("SpatioTemporalCluster")

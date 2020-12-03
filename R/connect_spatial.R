@@ -9,7 +9,7 @@
 #' @details This function is used to search clusters from top-left to bottom-right
 #' corner. The original codes are sourced from Fortran language and written by
 #' Samaniego et al., nature climate change, 2018.
-#' @export
+#' @keywords internal
 connect_spatial_forward <- function(matrix, clusterID, i, j) {
     if (isTRUE(matrix[i, j]) & is.na(clusterID[i, j])) {
         opt$id <- opt$id + 1
@@ -39,7 +39,7 @@ connect_spatial_forward <- function(matrix, clusterID, i, j) {
 #' corner. This search is completed after the forward search. The original codes
 #' are sourced from Fortran language and written by
 #' Samaniego et al., nature climate change, 2018.
-#' @export
+#' @keywords internal
 connect_spatial_backward <- function(clusterID, i, j) {
     for (k in 1:nrow(opt$pos)) {
         i2 <- opt$pos[k, 1] + i
@@ -55,6 +55,7 @@ connect_spatial_backward <- function(clusterID, i, j) {
     }
     return(clusterID)
 }
+
 #' @title Find all clusters in a matrix
 #' @description Find all clusters in space
 #' @param matrix a nxm matrix. Only TRUE and FALSE are included in this matrix.

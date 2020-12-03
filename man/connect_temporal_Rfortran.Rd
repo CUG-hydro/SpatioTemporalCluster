@@ -4,9 +4,11 @@
 \name{connect_temporal_Rfortran}
 \alias{connect_temporal_Rfortran}
 \alias{connect_temporal_Rjulia}
-\title{Find spatio-temporal clusters in a array}
+\title{Connect clusters in all times}
 \usage{
-connect_temporal_Rfortran(
+connect_temporal_Rfortran(r_cluster, ncell_overlap = 5, verbose = FALSE)
+
+connect_temporal_Rjulia(
   r_cluster,
   ncell_overlap = 5,
   factor = 10000,
@@ -21,27 +23,19 @@ connect_temporal_Rjulia(
 )
 }
 \arguments{
+\item{r_cluster}{a list which is the output of the function clusterID_recode}
+
 \item{ncell_overlap}{a integer. If the share grids of the two clusters in two
-consecutive layers are no less than the ncell_overlap, the two clusters will be
+consecutive layers are no less than the overlap, the two clusters will be
 taken as the same one.}
 
-\item{factor}{a integer which is used to compile a series number for each
-cluster.}
-
-\item{clusterID}{a three-dimensional array. This array is formed layer by
-layer. Each layer is a matrix that is the clusters identified by the function
-spatial_cluster_Fortran.}
+\item{verbose}{a logical value. If TRUE, the cluster translation process will
+be printed.}
 }
 \value{
-A array. The clusters in param clusterID are connected by temporal
-overlaps and renamed by a new series number.
+a a ngrid x ntime matrix in which all clusters are connected in space
+and time.
 }
 \description{
-Identify the evolution of regional event
-}
-\details{
-The function is used to connect the temporal links of spatial
-clusters identified by the function spatial_cluster_Fortran.
-The original codes are sourced from Fortran language and written by
-Samaniego et al., nature climate change, 2018.
+Find the same clusters in the whole period
 }

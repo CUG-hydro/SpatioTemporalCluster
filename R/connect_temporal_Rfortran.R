@@ -8,7 +8,7 @@ rev_rows <- function(mat) {
 
 #' @title Connect clusters in two neighbouring times
 #' @description Find same clusters in two neighbouring times
-#' @param r.cluster a list which is the output of the function clusterID_recode
+#' @param r_cluster a list which is the output of the function clusterID_recode
 #' @param ntime a integer indicates clusters in this time and before are connected
 #' @param mask a vector to show which grids have clusters
 #' @param ncluster a vector with the number of clusters in each time
@@ -23,15 +23,15 @@ rev_rows <- function(mat) {
 #' \item{cno}{a ntime x ncluster matrix with cluster encodings}
 #' }
 #' @export
-connect_neighbor <- function(r.cluster, ntime, ncluster, mask, ncell_overlap = 5, verbose = FALSE){
-    clusterID <- r.cluster$clusterID
-    cno       <- r.cluster$cno
+connect_neighbor <- function(r_cluster, ntime, ncluster, mask, ncell_overlap = 5, verbose = FALSE){
+    clusterID <- r_cluster$clusterID
+    cno       <- r_cluster$cno
     while(olp$overlap2){
         olp$overlap2 <- FALSE
-        for (i in 1:ncluster[ntime]){
-            if (is.na(cno[ntime, i]) | is_empty(cno[ntime, i])) next
+        for (i in 1:ncluster[ntime]) {
+            if (is.na(cno[ntime, i]) || is_empty(cno[ntime, i])) next
             for (j in 1:ncluster[ntime-1]){
-                if (is.na(cno[ntime-1, j]) | is_empty(cno[ntime-1, j])) next
+                if (is.na(cno[ntime-1, j]) || is_empty(cno[ntime-1, j])) next
                 id.now <- cno[ntime, i]
                 id.pre <- cno[ntime-1, j]
                 if (id.now == id.pre) next
@@ -50,12 +50,12 @@ connect_neighbor <- function(r.cluster, ntime, ncluster, mask, ncell_overlap = 5
             }
         }
     }
-    return(list(clusterID = clusterID, cno = cno))
+    listk(clusterID, cno)
 }
 
 #' @title Connect clusters in all times
 #' @description Find the same clusters in the whole period
-#' @param r.cluster a list which is the output of the function clusterID_recode
+#' @param r_cluster a list which is the output of the function clusterID_recode
 #' @param ncell_overlap a integer. If the share grids of the two clusters in two
 #' consecutive layers are no less than the overlap, the two clusters will be
 #' taken as the same one.
@@ -65,13 +65,13 @@ connect_neighbor <- function(r.cluster, ntime, ncluster, mask, ncell_overlap = 5
 #' and time.
 #' @importFrom progress progress_bar
 #' @export
-connect_temporal <- function(r.cluster, ncell_overlap = 5, verbose = FALSE){
+connect_temporal_Rfortran <- function(r_cluster, ncell_overlap = 5, verbose = FALSE){
     olp <- list2env(x = list(k1 = 0, k2 = 0, overlap1 = TRUE, overlap2 = TRUE))
     #Store to a physical address
     assign("olp", olp, envir = .GlobalEnv) #Assign to the global environment
-    ts <- ncol(r.cluster$clusterID)
-    ncluster  <- r.cluster$ncluster
-    mask      <- r.cluster$mask
+    ts <- ncol(r_cluster$clusterID)
+    ncluster  <- r_cluster$ncluster
+    mask      <- r_cluster$mask
     while (olp$overlap1){
         olp$overlap1 <- FALSE
         olp$k1 <- olp$k1 + 1
@@ -79,14 +79,14 @@ connect_temporal <- function(r.cluster, ncell_overlap = 5, verbose = FALSE){
                                total = ts-1, clear = FALSE)
         for (t in 2:ts){
             olp$overlap2 <- TRUE
-            r.cluster <- connect_neighbor(r.cluster = r.cluster, ntime = t,
+            r_cluster <- connect_neighbor(r_cluster = r_cluster, ntime = t,
                                           ncluster = ncluster, mask = mask,
                                           ncell_overlap = ncell_overlap,
                                           verbose = verbose)
             pb$tick()
         }
     }
-    return(r.cluster$clusterID)
+    return(r_cluster$clusterID)
 }
 
 
