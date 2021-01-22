@@ -26,7 +26,7 @@ The goal of SMI is to …
 ### 安装SpatioTemporal.cluster
 
 ``` r
-devtools::install_github("kongdd/SpatioTemporal.cluster")
+devtools::install_github("kongdd/SpatioTemporalCluster")
 ```
 
 ## Example
@@ -34,7 +34,7 @@ devtools::install_github("kongdd/SpatioTemporal.cluster")
 推荐使用julia版本的`cluster_SpatioTemporal`，且设置`method = "tree"`，此版本下速度最快
 
 ``` r
-library(SpatioTemporal.cluster)
+library(SpatioTemporalCluster)
 clusterIds <- cluster_SpatioTemporal_julia(arr, method = "tree",
     ncell_connected = 1L, ncell_overlap = 5L, factor = 1e4, diag = FALSE) 
 ```
