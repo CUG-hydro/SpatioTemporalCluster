@@ -19,7 +19,7 @@ julia_init <- function() {
 connect_spatial_julia <- function(arr, ncell_connect = 1L, factor = 1e4, diag = FALSE) {
     ans = julia_call("connect_spatial", arr,
         factor = as.integer(factor), # max clusters for each time
-        minCells = as.integer(ncell_connect),
+        ncell_connect = as.integer(ncell_connect),
         diag = diag
     )   
     ans %<>% set_names(c("ncluster", "cno", "clusterID"))
@@ -61,9 +61,9 @@ cluster_SpatioTemporal_julia <- function(arr, method = "tree",
 #' calculation.
 #' @param verbose a logical value. If TRUE, the cluster translation process will
 #' be printed.
-#' @importFrom parallel makeCluster stopCluster
-#' @importFrom doParallel registerDoParallel
 #' @import foreach
+#' 
+#' @rdname cluster_SpatioTemporal
 #' @export 
 cluster_SpatioTemporal_R <- function(arr, ncell_connect = 1, ncell_overlap = 5, 
     factor = 10000, diag = FALSE, 

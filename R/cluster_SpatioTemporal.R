@@ -1,3 +1,55 @@
+#' cluster_SpatioTemporal
+#' 
+#' cluster drought clusters in space and time
+#' 
+#' @param arr integer array, `[nrow, ncol, ntime]`, returned by [eventIndicator()]
+#' @param cellCoor integer matrix, `[nCells, 2]`
+#' @param ncell_connect treshold  for cluster formation in space
+#' @param ncell_overlap number cells for joining clusters in time
+#' @param factor max number of clusters per time
+#' 
+#' @author
+#' Dongdong Kong, 2021-05-29
+#' 
+#' @example R/example/ex-cluster_SpatioTemporal.R
+#' 
+#' @return
+#' - clusterId: with the same dimension as arr
+#' 
+#' @import magrittr
+#' @export
+cluster_SpatioTemporal <- function(
+    arr, cellCoor = NULL, 
+    ncell_connect = 1L, ncell_overlap = 1L, factor = 1e4, diag = FALSE)
+{
+    dim   <- dim(arr) 
+    nrows <- dim[1]
+    ncols <- dim[2]
+    ntime <- dim[3]
+    
+    if (is.null(cellCoor)) cellCoor <- expand.grid(x = 1:nrows, y = 1:ncols) %>% as.matrix()
+    nCells  <- dim(cellCoor)[1]    
+    
+    mode(arr) <- "integer"
+    mode(cellCoor) <- "integer"
+
+    clusterId = array(-9999L, dim = c(nrows, ncols, ntime))
+    nCluster  = 0L
+    r <- .Fortran("ClusterEvolution", 
+                  arr, nrows, ncols, ntime, nCells, cellCoor, 
+                  as.integer(ncell_overlap), as.integer(ncell_connect), as.integer(factor), diag,
+                  clusterId, nCluster)
+    r <- set_names(last(r, 2), c("clusterId", "nCluster"))
+    r$clusterId[r$clusterId == -9999L] = NA_integer_
+    shortCnoList   <- unique(as.numeric(r$clusterId)) %>% sort() %>% as.integer()
+    r$shortCnoList <- shortCnoList[shortCnoList != -9999L]
+
+    if (length(r$shortCnoList) != r$nCluster) {
+        stop("[e]: shortCnoList not equal to nCluster!")
+    }
+    r$clusterId
+}
+
 # tools::package_native_routine_registration_skeleton(".")
 
 #' eventIndicator
@@ -25,7 +77,7 @@
 #' 
 #' - `cellCoor`: index of selected region.
 #'  
-#' @example example/ex-cluster_SpatioTemporal.R
+#' @example R/example/ex-cluster_SpatioTemporal.R
 #' @keywords internal
 #' @export
 eventIndicator <- function(arr, threshold, mask = NULL, exceeding = TRUE, masked = FALSE){
@@ -74,54 +126,4 @@ eventIndicator <- function(arr, threshold, mask = NULL, exceeding = TRUE, masked
     # names(r) <- c("mat", "mask", "thld", "cellCoor", "SMIc")
     # .Fortran("eventIndicator", SMI, mask, threshold, )
     set_names(last(r, 2)[2:1], c("array", "cellCoor"))    
-}
-
-
-#' cluster_SpatioTemporal
-#' 
-#' cluster drought clusters in space and time
-#' 
-#' @param arr integer array, `[nrow, ncol, ntime]`, returned by [eventIndicator()]
-#' @param cellCoor integer matrix, `[nCells, 2]`
-#' @param ncell_connect treshold  for cluster formation in space
-#' @param ncell_overlap number cells for joining clusters in time
-#' @param factor max number of clusters per time
-#' 
-#' @author
-#' Budapest, 10-11.03.2011
-#' 
-#' @example example/ex-cluster_SpatioTemporal.R
-#' 
-#' @import magrittr
-#' @export
-cluster_SpatioTemporal <- function(
-    arr, cellCoor = NULL, 
-    ncell_connect = 1L, ncell_overlap = 1L, factor = 1e4, diag = FALSE)
-{
-    dim   <- dim(arr) 
-    nrows <- dim[1]
-    ncols <- dim[2]
-    ntime <- dim[3]
-    
-    if (is.null(cellCoor)) cellCoor <- expand.grid(x = 1:nrows, y = 1:ncols) %>% as.matrix()
-    nCells  <- dim(cellCoor)[1]    
-    
-    mode(arr) <- "integer"
-    mode(cellCoor) <- "integer"
-
-    clusterId = array(-9999L, dim = c(nrows, ncols, ntime))
-    nCluster  = 0L
-    r <- .Fortran("ClusterEvolution", 
-                  arr, nrows, ncols, ntime, nCells, cellCoor, 
-                  as.integer(ncell_overlap), as.integer(ncell_connect), as.integer(factor), diag,
-                  clusterId, nCluster)
-    r <- set_names(last(r, 2), c("clusterId", "nCluster"))
-    r$clusterId[r$clusterId == -9999L] = NA_integer_
-    shortCnoList   <- unique(as.numeric(r$clusterId)) %>% sort() %>% as.integer()
-    r$shortCnoList <- shortCnoList[shortCnoList != -9999L]
-
-    if (length(r$shortCnoList) != r$nCluster) {
-        stop("[e]: shortCnoList not equal to nCluster!")
-    }
-    r$clusterId
 }

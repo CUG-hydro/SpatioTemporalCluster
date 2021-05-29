@@ -6,7 +6,7 @@
 #' @param shortCnoList vector, cluster num_id
 #' @param mGridArea matrix of grid area
 #' 
-#' @example example/ex-cluster_SpatioTemporal.R
+#' @example R/example/ex-cluster_SpatioTemporal.R
 #'
 #' @export
 cluster_stats <- function(mat, mask, threshold, 

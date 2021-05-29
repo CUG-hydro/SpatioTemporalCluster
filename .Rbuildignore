@@ -7,6 +7,9 @@
 ^codecov\.yml$
 ^src/mo_weight$
 ^Figures$
+^scripts$
 ^data-raw$
+^temp$
+^test$
 ^cluster/OUTPUT$
 ^inst/cluster/OUTPUT$

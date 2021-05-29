@@ -15,7 +15,6 @@ test_that("cluster_SpatioTemporal in julia,R,Fortran works",
     ncell_connect = 5
     ncell_overlap = 5
     
-    
     # write_fig(plot.cluster(clusterId_jl, 1:3, main = "Julia"), "julia.pdf")
     system.time(clusterId_f90 <- cluster_SpatioTemporal(arr, NULL, ncell_connect, ncell_overlap, factor, diag))
     

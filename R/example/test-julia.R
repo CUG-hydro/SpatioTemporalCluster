@@ -1,4 +1,4 @@
-library(SpatioTemporal.cluster)
+library(SpatioTemporalCluster)
 
 ndim <- 10
 ntime = 4
@@ -17,8 +17,6 @@ all.equal(cluster_grids(z2), cluster_grids(z3))
 all.equal(cluster_grids(z2), cluster_grids(z4))
 all.equal(cluster_grids(z2), cluster_grids(z1))
 all.equal(cluster_grids(z5), cluster_grids(z6))
-
 all.equal(cluster_grids(z1), cluster_grids(z5))
-
 # write_fig(plot.cluster(z1, main = "Fortran"), "Fortran.pdf")
 # write_fig(plot.cluster(z5, main = "Rjulia"), "RJulia.pdf")
