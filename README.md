@@ -13,7 +13,7 @@ status](https://travis-ci.org/kongdd/heatwave.svg?branch=master)](https://travis
 coverage](https://codecov.io/gh/kongdd/heatwave/branch/master/graph/badge.svg)](https://codecov.io/gh/kongdd/heatwave?branch=master)
 <!-- badges: end -->
 
-The goal of SMI is to …
+The goal of SMI is to 对时空关联的干旱进行特征分析
 
 ## Installation
 
